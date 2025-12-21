@@ -1,0 +1,42 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Next.js ビルドに必要な環境変数（CI用ダミー値）
+env:
+  TURSO_DATABASE_URL: "libsql://dummy.turso.io"
+  TURSO_AUTH_TOKEN: "dummy-token"
+  BETTER_AUTH_SECRET: "dummy-secret-for-ci-build"
+  GOOGLE_CLIENT_ID: "dummy-client-id"
+  GOOGLE_CLIENT_SECRET: "dummy-client-secret"
+  NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run lint
+    - run: npx tsc --noEmit
+    - run: npm run build --if-present
+    # - run: npm test  # テストを追加したら有効化

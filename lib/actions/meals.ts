@@ -212,3 +212,59 @@ export async function getTodayCalories() {
     return 0;
   }
 }
+
+export async function getTodayMeals() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です", data: [] };
+  }
+
+  try {
+    const today = getTodayDate();
+    const result = await db
+      .select()
+      .from(meals)
+      .where(and(eq(meals.userId, session.user.id), eq(meals.mealDate, today)))
+      .orderBy(desc(meals.mealTime));
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("食事記録の取得に失敗しました:", error);
+    return { success: false, error: "取得に失敗しました", data: [] };
+  }
+}
+
+export async function getWeekMeals() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です", data: [] };
+  }
+
+  try {
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(today.getDate() - 7);
+    
+    const result = await db
+      .select()
+      .from(meals)
+      .where(
+        and(
+          eq(meals.userId, session.user.id),
+          gte(meals.mealDate, weekAgo.toISOString().split("T")[0])
+        )
+      )
+      .orderBy(desc(meals.mealDate));
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("食事記録の取得に失敗しました:", error);
+    return { success: false, error: "取得に失敗しました", data: [] };
+  }
+}

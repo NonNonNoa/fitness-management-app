@@ -1,189 +1,233 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { useSession } from "@/lib/auth/client";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { signOut, useSession } from "@/lib/auth/client";
+import { 
+  Home, Utensils, Dumbbell, Target, User, Zap, 
+  Menu, X 
+} from "lucide-react";
+import { BottomNav } from "@/components/ui/bottom-nav";
+import { useState } from "react";
 
-const navigation = [
-  { name: "ダッシュボード", href: "/dashboard", icon: HomeIcon },
-  { name: "食事管理", href: "/meals", icon: MealIcon },
-  { name: "トレーニング", href: "/workouts", icon: WorkoutIcon },
-  { name: "目標", href: "/goals", icon: GoalIcon },
+const sidebarItems = [
+  { href: "/dashboard", icon: Home, label: "ダッシュボード" },
+  { href: "/meals", icon: Utensils, label: "食事管理" },
+  { href: "/workouts", icon: Dumbbell, label: "トレーニング" },
+  { href: "/goals", icon: Target, label: "目標" },
+  { href: "/ai", icon: Zap, label: "AI機能" },
+  { href: "/profile", icon: User, label: "プロフィール" },
 ];
 
-function HomeIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-  );
-}
-
-function MealIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-    </svg>
-  );
-}
-
-function WorkoutIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-    </svg>
-  );
-}
-
-function GoalIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    </svg>
-  );
-}
-
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleSignOut = async () => {
-    await signOut();
-    window.location.href = "/login";
-  };
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.push("/login");
+    }
+  }, [session, isPending, router]);
+
+  // モバイルでページ遷移時にサイドバーを閉じる
+  const prevPathname = pathname;
+  if (prevPathname !== pathname && sidebarOpen) {
+    // 非同期でstateを更新してカスケードを避ける
+    queueMicrotask(() => setSidebarOpen(false));
+  }
+
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full"
+        />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      {/* モバイルヘッダー */}
-      <div className="lg:hidden">
-        <div className="flex items-center justify-between bg-zinc-900 px-4 py-3 border-b border-zinc-800">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 bg-zinc-900/95 backdrop-blur-lg border-r border-zinc-800 flex-col">
+        {/* Logo */}
+        <div className="p-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+              <Dumbbell className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-white">フィットネスAI</span>
+            <span className="text-xl font-bold text-white">FitTrack</span>
           </Link>
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-zinc-400 hover:text-white"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
         </div>
-        
-        {/* モバイルメニュー */}
-        {isMobileMenuOpen && (
-          <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-2">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${
-                  pathname.startsWith(item.href)
-                    ? "bg-orange-500/10 text-orange-400"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-800"
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-                {item.name}
-              </Link>
-            ))}
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              ログアウト
-            </button>
-          </div>
-        )}
-      </div>
 
-      <div className="flex">
-        {/* デスクトップサイドバー */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-zinc-900 border-r border-zinc-800">
-          <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <div className="flex items-center gap-3 px-4 mb-8">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-white">フィットネスAI</span>
-            </div>
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4">
+          <ul className="space-y-1">
+            {sidebarItems.map((item) => {
+              const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+              const Icon = item.icon;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                      isActive
+                        ? "bg-orange-500/10 text-orange-400"
+                        : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="font-medium">{item.label}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebarIndicator"
+                        className="absolute left-0 w-1 h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-r-full"
+                      />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-            <nav className="flex-1 px-3 space-y-1">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    pathname.startsWith(item.href)
-                      ? "bg-gradient-to-r from-orange-500/20 to-red-600/20 text-orange-400 border border-orange-500/20"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* ユーザー情報 */}
-          <div className="p-4 border-t border-zinc-800">
-            <div className="flex items-center gap-3">
-              {session?.user?.image ? (
+        {/* User */}
+        <div className="p-4 border-t border-zinc-800">
+          <div className="flex items-center gap-3 px-3 py-2">
+            <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden">
+              {session.user?.image ? (
                 <img
                   src={session.user.image}
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full"
+                  alt=""
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center">
-                  <span className="text-white font-medium">
-                    {session?.user?.name?.[0] || "U"}
-                  </span>
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-600">
+                  <User className="w-5 h-5 text-white" />
                 </div>
               )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
-                  {session?.user?.name || "ユーザー"}
-                </p>
-                <p className="text-xs text-zinc-500 truncate">
-                  {session?.user?.email}
-                </p>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg"
-                title="ログアウト"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {session.user?.name}
+              </p>
+              <p className="text-xs text-zinc-500 truncate">
+                {session.user?.email}
+              </p>
             </div>
           </div>
-        </aside>
+        </div>
+      </aside>
 
-        {/* メインコンテンツ */}
-        <main className="flex-1 lg:pl-64">
-          <div className="py-6 px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
-        </main>
-      </div>
+      {/* Mobile Header */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur-lg border-b border-zinc-800">
+        <div className="flex items-center justify-between px-4 h-14">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+              <Dumbbell className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-lg font-bold text-white">FitTrack</span>
+          </Link>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg hover:bg-zinc-800 transition-colors"
+          >
+            {sidebarOpen ? (
+              <X className="w-5 h-5 text-zinc-400" />
+            ) : (
+              <Menu className="w-5 h-5 text-zinc-400" />
+            )}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden fixed inset-0 z-40 bg-black/60"
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="md:hidden fixed left-0 top-0 bottom-0 w-64 z-50 bg-zinc-900 border-r border-zinc-800"
+            >
+              <div className="p-6">
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                    <Dumbbell className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-xl font-bold text-white">FitTrack</span>
+                </Link>
+              </div>
+              <nav className="px-3 py-4">
+                <ul className="space-y-1">
+                  {sidebarItems.map((item) => {
+                    const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+                    const Icon = item.icon;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                            isActive
+                              ? "bg-orange-500/10 text-orange-400"
+                              : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                          }`}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <main className="md:ml-64 pt-14 md:pt-0 pb-20 md:pb-0">
+        <div className="max-w-6xl mx-auto p-4 md:p-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </main>
+
+      {/* Bottom Nav (Mobile) */}
+      <BottomNav />
     </div>
   );
 }
-

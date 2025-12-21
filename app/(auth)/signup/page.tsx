@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { signIn } from "@/lib/auth/client";
 
+interface AuthError {
+  message?: string;
+  code?: string;
+}
+
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,13 +33,13 @@ export default function SignupPage() {
       // エラーがある場合
       if (result?.error) {
         let errorMessage: string;
-        const err = (result as { error?: any })?.error;
-        if (typeof err === "string") {
-          errorMessage = err;
-        } else if (err?.message) {
-          errorMessage = err.message;
-        } else if (err?.code) {
-          errorMessage = `エラーコード: ${err.code}`;
+        const authError = result.error as AuthError;
+        if (typeof authError === "string") {
+          errorMessage = authError;
+        } else if (authError?.message) {
+          errorMessage = authError.message;
+        } else if (authError?.code) {
+          errorMessage = `エラーコード: ${authError.code}`;
         } else {
           errorMessage = JSON.stringify(result.error);
         }
@@ -42,9 +47,9 @@ export default function SignupPage() {
         setError(`登録エラー: ${errorMessage}`);
         setIsLoading(false);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Signup error:", err);
-      const errorMessage = err?.message || err?.toString() || "不明なエラー";
+      const errorMessage = err instanceof Error ? err.message : "不明なエラー";
       setError(`登録に失敗しました: ${errorMessage}`);
       setIsLoading(false);
     }

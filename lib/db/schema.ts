@@ -163,6 +163,46 @@ export const bodyCompositions = sqliteTable("body_compositions", {
   userIdIdx: index("body_compositions_user_id_idx").on(table.userId),
 }));
 
+// ==================== Achievement/Badge Tables ====================
+
+export const achievements = sqliteTable("achievements", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  category: text("category").notNull(), // 'workout' | 'meal' | 'goal' | 'streak' | 'milestone'
+  requirement: text("requirement").notNull(), // JSON string with requirements
+  points: integer("points").notNull().default(10),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const userAchievements = sqliteTable("user_achievements", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  achievementId: text("achievement_id").notNull().references(() => achievements.id, { onDelete: "cascade" }),
+  earnedAt: integer("earned_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  progress: integer("progress").default(0),
+  isCompleted: integer("is_completed", { mode: "boolean" }).notNull().default(false),
+}, (table) => ({
+  userIdIdx: index("user_achievements_user_id_idx").on(table.userId),
+  uniqueUserAchievement: uniqueIndex("user_achievements_unique_idx").on(table.userId, table.achievementId),
+}));
+
+// ==================== Notification Tables ====================
+
+export const notifications = sqliteTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'reminder' | 'achievement' | 'goal' | 'system'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
+  actionUrl: text("action_url"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+}, (table) => ({
+  userIdIdx: index("notifications_user_id_idx").on(table.userId),
+}));
+
 // ==================== Type Exports ====================
 
 export type User = typeof users.$inferSelect;
@@ -195,3 +235,11 @@ export type NewMealItem = typeof mealItems.$inferInsert;
 export type BodyComposition = typeof bodyCompositions.$inferSelect;
 export type NewBodyComposition = typeof bodyCompositions.$inferInsert;
 
+export type Achievement = typeof achievements.$inferSelect;
+export type NewAchievement = typeof achievements.$inferInsert;
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type NewUserAchievement = typeof userAchievements.$inferInsert;
+
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;

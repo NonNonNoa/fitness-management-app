@@ -246,3 +246,50 @@ export async function getBodyCompositions(limit = 30) {
     return [];
   }
 }
+
+export async function getActiveGoals() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です", data: [] };
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(goals)
+      .where(and(eq(goals.userId, session.user.id), eq(goals.isActive, true)))
+      .orderBy(desc(goals.createdAt));
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("目標の取得に失敗しました:", error);
+    return { success: false, error: "取得に失敗しました", data: [] };
+  }
+}
+
+export async function getRecentBodyCompositions(limit = 14) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です", data: [] };
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(bodyCompositions)
+      .where(eq(bodyCompositions.userId, session.user.id))
+      .orderBy(desc(bodyCompositions.recordDate))
+      .limit(limit);
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("体組成の取得に失敗しました:", error);
+    return { success: false, error: "取得に失敗しました", data: [] };
+  }
+}

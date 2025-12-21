@@ -1,5 +1,4 @@
 import { getWorkouts } from "@/lib/actions/workouts";
-import { getBodyPartLabel } from "@/lib/utils/workout-helpers";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 

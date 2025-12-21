@@ -249,3 +249,50 @@ export async function getTodaySets() {
     return 0;
   }
 }
+
+export async function getTodayWorkouts() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です", data: [] };
+  }
+
+  try {
+    const today = getTodayDate();
+    const result = await db
+      .select()
+      .from(workouts)
+      .where(and(eq(workouts.userId, session.user.id), eq(workouts.workoutDate, today)));
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("トレーニング記録の取得に失敗しました:", error);
+    return { success: false, error: "取得に失敗しました", data: [] };
+  }
+}
+
+export async function getRecentWorkouts(limit = 10) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です", data: [] };
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(workouts)
+      .where(eq(workouts.userId, session.user.id))
+      .orderBy(desc(workouts.workoutDate))
+      .limit(limit);
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("トレーニング記録の取得に失敗しました:", error);
+    return { success: false, error: "取得に失敗しました", data: [] };
+  }
+}

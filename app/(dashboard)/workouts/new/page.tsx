@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createWorkout, getExercises, getBodyPartLabel, WorkoutFormData } from "@/lib/actions/workouts";
+import { createWorkout, getExercises, WorkoutFormData } from "@/lib/actions/workouts";
+import { getBodyPartLabel } from "@/lib/utils/workout-helpers";
 import type { Exercise } from "@/lib/db/schema";
 
 type WorkoutSet = {
@@ -55,7 +56,7 @@ export default function NewWorkoutPage() {
     setSets([
       ...sets,
       {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         exerciseId: exercise.id,
         exerciseName: exercise.name,
         setNumber: nextSetNumber,

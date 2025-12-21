@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { signIn } from "@/lib/auth/client";
 
+interface AuthError {
+  message?: string;
+  code?: string;
+}
+
 export default function LoginPage() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,13 +33,13 @@ export default function LoginPage() {
       if (result?.error) {
         // エラーオブジェクトを詳細に解析
         let errorMessage: string;
-        const error: any = result.error;
-        if (typeof error === "string") {
-          errorMessage = error;
-        } else if (error?.message) {
-          errorMessage = error.message;
-        } else if (error?.code) {
-          errorMessage = `エラーコード: ${error.code}`;
+        const authError = result.error as AuthError;
+        if (typeof authError === "string") {
+          errorMessage = authError;
+        } else if (authError?.message) {
+          errorMessage = authError.message;
+        } else if (authError?.code) {
+          errorMessage = `エラーコード: ${authError.code}`;
         } else {
           errorMessage = JSON.stringify(result.error);
         }
@@ -45,9 +48,9 @@ export default function LoginPage() {
         setIsLoading(false);
       }
       // リダイレクトが発生しない場合（設定の問題）
-    } catch (err: any) {
+    } catch (err) {
       console.error("Sign in error:", err);
-      const errorMessage = err?.message || err?.toString() || "不明なエラー";
+      const errorMessage = err instanceof Error ? err.message : "不明なエラー";
       setError(`ログインに失敗しました: ${errorMessage}`);
       setIsLoading(false);
     }

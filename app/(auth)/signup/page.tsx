@@ -23,15 +23,14 @@ export default function SignupPage() {
       
       if (result.error) {
         let errorMessage = "登録に失敗しました"
-        const err: unknown = result.error;
-        if (typeof err === "object" && err !== null && "message" in err && typeof (err as any).message === "string") {
-          errorMessage = (err as { message: string }).message;
-        } else if (typeof err === "string") {
-          errorMessage = err;
-        } else {
-          errorMessage = "登録に失敗しました";
+        const errorVal: unknown = result.error
+        if (typeof errorVal === "object" && errorVal !== null && "message" in errorVal) {
+          const msg = (errorVal as Record<string, unknown>).message
+          errorMessage = typeof msg === "string" ? msg : JSON.stringify(errorVal)
+        } else if (typeof errorVal === "string") {
+          errorMessage = errorVal
         }
-        setError(errorMessage);
+        setError(errorMessage)
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "予期せぬエラーが発生しました"

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { signIn } from "@/lib/auth/client"
 import { motion } from "framer-motion"
@@ -11,7 +10,6 @@ import { Dumbbell, Zap, Target, TrendingUp } from "lucide-react"
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
@@ -25,10 +23,10 @@ export default function LoginPage() {
       
       if (result.error) {
         let errorMessage = "ログインに失敗しました"
-        // 型エラー回避のため result の型をアサート
-        const errorVal: unknown = (result as any).error
-        if (typeof errorVal === "object" && errorVal !== null) {
-          errorMessage = (errorVal as { message?: string }).message || JSON.stringify(errorVal)
+        const errorVal: unknown = result.error
+        if (typeof errorVal === "object" && errorVal !== null && "message" in errorVal) {
+          const msg = (errorVal as Record<string, unknown>).message
+          errorMessage = typeof msg === "string" ? msg : JSON.stringify(errorVal)
         } else if (typeof errorVal === "string") {
           errorMessage = errorVal
         }

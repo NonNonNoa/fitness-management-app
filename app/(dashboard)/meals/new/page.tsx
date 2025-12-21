@@ -1,303 +1,274 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { createMeal, MealFormData } from "@/lib/actions/meals";
-
-type MealItem = {
-  id: string;
-  foodName: string;
-  quantity?: number;
-  unit?: string;
-  calories?: number;
-  protein?: number;
-  carbs?: number;
-  fats?: number;
-};
+import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { motion } from "framer-motion"
+import { 
+  ArrowLeft, 
+  Camera, 
+  Search, 
+  Coffee, 
+  Sun, 
+  Moon, 
+  Cookie,
+  Plus,
+  Minus,
+  Sparkles
+} from "lucide-react"
+import { AnimatedCard } from "@/components/ui/animated-card"
+import { AnimatedButton } from "@/components/ui/animated-button"
+import { AnimatedInput, NumberInput, AnimatedTextarea } from "@/components/ui/animated-input"
+import { StaggerContainer, StaggerItem } from "@/components/ui/motion"
 
 export default function NewMealPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialType = searchParams.get("type") || "lunch"
 
-  const [mealDate, setMealDate] = useState(new Date().toISOString().split("T")[0]);
-  const [mealTime, setMealTime] = useState(
-    new Date().toTimeString().split(" ")[0].slice(0, 5)
-  );
-  const [mealType, setMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack">("lunch");
-  const [notes, setNotes] = useState("");
-  const [items, setItems] = useState<MealItem[]>([
-    { id: "1", foodName: "", calories: undefined },
-  ]);
+  const [mealType, setMealType] = useState(initialType)
+  const [mealName, setMealName] = useState("")
+  const [calories, setCalories] = useState(0)
+  const [protein, setProtein] = useState(0)
+  const [carbs, setCarbs] = useState(0)
+  const [fat, setFat] = useState(0)
+  const [notes, setNotes] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const addItem = () => {
-    setItems([
-      ...items,
-      { id: Date.now().toString(), foodName: "", calories: undefined },
-    ]);
-  };
+  const mealTypes = [
+    { type: "breakfast", icon: <Coffee size={20} />, label: "朝食" },
+    { type: "lunch", icon: <Sun size={20} />, label: "昼食" },
+    { type: "dinner", icon: <Moon size={20} />, label: "夕食" },
+    { type: "snack", icon: <Cookie size={20} />, label: "間食" },
+  ]
 
-  const removeItem = (id: string) => {
-    if (items.length > 1) {
-      setItems(items.filter((item) => item.id !== id));
-    }
-  }; 
+  const quickFoods = [
+    { name: "プロテイン", calories: 120, protein: 25, carbs: 3, fat: 1 },
+    { name: "鶏胸肉 100g", calories: 165, protein: 31, carbs: 0, fat: 3.6 },
+    { name: "白米 150g", calories: 252, protein: 3.8, carbs: 55.7, fat: 0.5 },
+    { name: "卵 1個", calories: 91, protein: 7.4, carbs: 0.2, fat: 6.5 },
+  ]
 
-  const updateItem = (id: string, field: keyof MealItem, value: string | number) => {
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    );
-  };
+  const handleQuickAdd = (food: typeof quickFoods[0]) => {
+    setMealName(food.name)
+    setCalories(food.calories)
+    setProtein(food.protein)
+    setCarbs(food.carbs)
+    setFat(food.fat)
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    // バリデーション
-    const validItems = items.filter((item) => item.foodName.trim() !== "");
-    if (validItems.length === 0) {
-      setError("少なくとも1つの食品を入力してください");
-      setIsLoading(false);
-      return;
-    }
-
-    const data: MealFormData = {
-      mealDate,
-      mealTime,
-      mealType,
-      notes: notes || undefined,
-      items: validItems.map((item) => ({
-        foodName: item.foodName,
-        quantity: item.quantity,
-        unit: item.unit,
-        calories: item.calories,
-        protein: item.protein,
-        carbs: item.carbs,
-        fats: item.fats,
-      })),
-    };
-
-    const result = await createMeal(data);
-
-    if (result.success) {
-      router.push("/meals");
-    } else {
-      setError(result.error || "食事の記録に失敗しました");
-    }
-
-    setIsLoading(false);
-  };
-
-  const mealTypeOptions = [
-    { value: "breakfast", label: "朝食", icon: "🌅" },
-    { value: "lunch", label: "昼食", icon: "☀️" },
-    { value: "dinner", label: "夕食", icon: "🌙" },
-    { value: "snack", label: "間食", icon: "🍪" },
-  ];
-
-  // 合計カロリーを計算
-  const totalCalories = items.reduce((sum, item) => sum + (item.calories || 0), 0);
+  const handleSubmit = async () => {
+    setIsLoading(true)
+    // TODO: API呼び出し
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    router.push("/meals")
+  }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="px-4 pt-6 pb-8">
       {/* ヘッダー */}
-      <div className="flex items-center gap-4">
-        <Link
-          href="/meals"
-          className="p-2 rounded-lg hover:bg-zinc-800 transition-colors"
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-4 mb-6"
+      >
+        <motion.button
+          onClick={() => router.back()}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="p-2 rounded-xl bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
         >
-          <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
+          <ArrowLeft size={24} />
+        </motion.button>
         <div>
-          <h1 className="text-2xl font-bold text-white">食事を記録</h1>
-          <p className="text-zinc-400 mt-1">今日の食事を記録しましょう</p>
+          <h1 className="text-xl font-bold text-white">食事を記録</h1>
+          <p className="text-sm text-zinc-400">栄養素を入力してください</p>
         </div>
-      </div>
+      </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 日時と種類 */}
-        <Card>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="日付"
-                type="date"
-                value={mealDate}
-                onChange={(e) => setMealDate(e.target.value)}
-                required
-              />
-              <Input
-                label="時間"
-                type="time"
-                value={mealTime}
-                onChange={(e) => setMealTime(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                食事の種類
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {mealTypeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setMealType(option.value as typeof mealType)}
-                    className={`p-3 rounded-lg border text-center transition-all ${
-                      mealType === option.value
-                        ? "border-orange-500 bg-orange-500/10 text-orange-400"
-                        : "border-zinc-700 hover:border-zinc-600 text-zinc-400"
-                    }`}
-                  >
-                    <span className="text-lg block mb-1">{option.icon}</span>
-                    <span className="text-xs">{option.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* 食品リスト */}
-        <Card title="食品">
-          <div className="space-y-4">
-            {items.map((item, index) => (
-              <div
-                key={item.id}
-                className="p-4 bg-zinc-800/50 rounded-lg space-y-3"
-              >
-                <div className="flex items-start justify-between">
-                  <span className="text-sm text-zinc-500">食品 {index + 1}</span>
-                  {items.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.id)}
-                      className="text-zinc-500 hover:text-red-400 transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-
-                <Input
-                  placeholder="食品名（例：ご飯、鶏肉など）"
-                  value={item.foodName}
-                  onChange={(e) => updateItem(item.id, "foodName", e.target.value)}
-                />
-
-                <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    label="カロリー"
-                    type="number"
-                    placeholder="kcal"
-                    value={item.calories || ""}
-                    onChange={(e) => updateItem(item.id, "calories", parseInt(e.target.value) || 0)}
-                  />
-                  <Input
-                    label="数量"
-                    type="number"
-                    placeholder="g / ml / 個"
-                    value={item.quantity || ""}
-                    onChange={(e) => updateItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <Input
-                    label="タンパク質 (g)"
-                    type="number"
-                    step="0.1"
-                    value={item.protein || ""}
-                    onChange={(e) => updateItem(item.id, "protein", parseFloat(e.target.value) || 0)}
-                  />
-                  <Input
-                    label="炭水化物 (g)"
-                    type="number"
-                    step="0.1"
-                    value={item.carbs || ""}
-                    onChange={(e) => updateItem(item.id, "carbs", parseFloat(e.target.value) || 0)}
-                  />
-                  <Input
-                    label="脂質 (g)"
-                    type="number"
-                    step="0.1"
-                    value={item.fats || ""}
-                    onChange={(e) => updateItem(item.id, "fats", parseFloat(e.target.value) || 0)}
-                  />
-                </div>
-              </div>
-            ))}
-
-            <button
-              type="button"
-              onClick={addItem}
-              className="w-full p-3 border-2 border-dashed border-zinc-700 rounded-lg text-zinc-400 hover:border-zinc-600 hover:text-zinc-300 transition-all flex items-center justify-center gap-2"
+      {/* 食事タイプ選択 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mb-6"
+      >
+        <label className="block text-sm font-medium text-zinc-300 mb-3">食事タイプ</label>
+        <div className="grid grid-cols-4 gap-2">
+          {mealTypes.map((meal) => (
+            <motion.button
+              key={meal.type}
+              onClick={() => setMealType(meal.type)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`flex flex-col items-center p-3 rounded-xl border transition-all ${
+                mealType === meal.type
+                  ? "bg-orange-500/20 border-orange-500 text-orange-500"
+                  : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+              }`}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              食品を追加
-            </button>
-          </div>
-        </Card>
+              {meal.icon}
+              <span className="text-xs mt-1 font-medium">{meal.label}</span>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
 
-        {/* メモ */}
-        <Card title="メモ（任意）">
-          <textarea
+      {/* AI/カメラ入力 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-2 gap-3 mb-6"
+      >
+        <AnimatedCard className="p-4 cursor-pointer hover:border-orange-500/30 transition-colors">
+          <div className="flex flex-col items-center text-center">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 text-orange-500 mb-2">
+              <Camera size={24} />
+            </div>
+            <p className="text-sm font-medium text-white">写真で記録</p>
+            <p className="text-xs text-zinc-500">AIが自動計算</p>
+          </div>
+        </AnimatedCard>
+        <AnimatedCard className="p-4 cursor-pointer hover:border-cyan-500/30 transition-colors">
+          <div className="flex flex-col items-center text-center">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 text-cyan-500 mb-2">
+              <Search size={24} />
+            </div>
+            <p className="text-sm font-medium text-white">食品を検索</p>
+            <p className="text-xs text-zinc-500">データベースから</p>
+          </div>
+        </AnimatedCard>
+      </motion.div>
+
+      {/* クイック追加 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mb-6"
+      >
+        <label className="block text-sm font-medium text-zinc-300 mb-3">よく使う食品</label>
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {quickFoods.map((food) => (
+            <motion.button
+              key={food.name}
+              onClick={() => handleQuickAdd(food)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-shrink-0 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-zinc-300 hover:border-orange-500/30 transition-colors"
+            >
+              {food.name}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* 手動入力フォーム */}
+      <StaggerContainer className="space-y-4 mb-8">
+        <StaggerItem>
+          <AnimatedInput
+            label="食品名"
+            placeholder="例: 鶏胸肉のグリル"
+            value={mealName}
+            onChange={(e) => setMealName(e.target.value)}
+          />
+        </StaggerItem>
+
+        <StaggerItem>
+          <NumberInput
+            label="カロリー"
+            value={calories}
+            onChange={setCalories}
+            step={10}
+            unit="kcal"
+          />
+        </StaggerItem>
+
+        <StaggerItem>
+          <div className="grid grid-cols-3 gap-3">
+            <NumberInput
+              label="タンパク質"
+              value={protein}
+              onChange={setProtein}
+              unit="g"
+            />
+            <NumberInput
+              label="炭水化物"
+              value={carbs}
+              onChange={setCarbs}
+              unit="g"
+            />
+            <NumberInput
+              label="脂質"
+              value={fat}
+              onChange={setFat}
+              unit="g"
+            />
+          </div>
+        </StaggerItem>
+
+        <StaggerItem>
+          <AnimatedTextarea
+            label="メモ（任意）"
+            placeholder="食事に関するメモ..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="食事に関するメモ..."
-            className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
-            rows={3}
           />
-        </Card>
+        </StaggerItem>
+      </StaggerContainer>
 
-        {/* 合計とエラー */}
-        <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-zinc-400">合計カロリー</span>
-            <span className="text-2xl font-bold text-orange-400">{totalCalories} kcal</span>
-          </div>
-        </div>
+      {/* プレビュー */}
+      {(mealName || calories > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <AnimatedCard variant="gradient" className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles size={16} className="text-orange-500" />
+              <span className="text-sm text-zinc-400">プレビュー</span>
+            </div>
+            <p className="font-medium text-white mb-2">{mealName || "食品名未入力"}</p>
+            <div className="grid grid-cols-4 gap-2 text-center text-sm">
+              <div>
+                <p className="text-zinc-500">カロリー</p>
+                <p className="font-bold text-orange-500">{calories}</p>
+              </div>
+              <div>
+                <p className="text-zinc-500">P</p>
+                <p className="font-bold text-cyan-500">{protein}g</p>
+              </div>
+              <div>
+                <p className="text-zinc-500">C</p>
+                <p className="font-bold text-green-500">{carbs}g</p>
+              </div>
+              <div>
+                <p className="text-zinc-500">F</p>
+                <p className="font-bold text-yellow-500">{fat}g</p>
+              </div>
+            </div>
+          </AnimatedCard>
+        </motion.div>
+      )}
 
-        {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-            {error}
-          </div>
-        )}
-
-        {/* 送信ボタン */}
-        <div className="flex gap-3">
-          <Link
-            href="/meals"
-            className="flex-1 py-3 px-4 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-800 transition-all text-center"
-          >
-            キャンセル
-          </Link>
-          <Button
-            type="submit"
-            size="lg"
-            className="flex-1"
-            isLoading={isLoading}
-          >
-            記録する
-          </Button>
-        </div>
-      </form>
+      {/* 保存ボタン */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <AnimatedButton
+          onClick={handleSubmit}
+          isLoading={isLoading}
+          variant="primary"
+          size="lg"
+          className="w-full"
+          disabled={!mealName || calories === 0}
+        >
+          記録を保存
+        </AnimatedButton>
+      </motion.div>
     </div>
-  );
+  )
 }
-
-

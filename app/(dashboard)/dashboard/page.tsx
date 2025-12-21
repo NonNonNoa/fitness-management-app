@@ -1,160 +1,274 @@
-"use client";
+"use client"
 
-import { useSession } from "@/lib/auth/client";
-import { Card } from "@/components/ui/card";
-import Link from "next/link";
+import { motion } from "framer-motion"
+import Link from "next/link"
+import { 
+  Flame, 
+  Dumbbell, 
+  Target, 
+  TrendingUp, 
+  Plus, 
+  ChevronRight,
+  Utensils,
+  Trophy,
+  Calendar
+} from "lucide-react"
+import { AnimatedCard, StatsCard, ActionCard } from "@/components/ui/animated-card"
+import { AnimatedButton, FloatingActionButton } from "@/components/ui/animated-button"
+import { AnimatedProgressBar, StaggerContainer, StaggerItem } from "@/components/ui/motion"
 
 export default function DashboardPage() {
-  const { data: session, isPending } = useSession();
-
-  if (isPending) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-      </div>
-    );
+  // サンプルデータ（実際はAPIから取得）
+  const stats = {
+    calories: { consumed: 1850, target: 2500 },
+    protein: { consumed: 120, target: 180 },
+    workouts: 3,
+    streak: 7
   }
 
-  const today = new Date().toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  });
+  const quickActions = [
+    { 
+      icon: <Utensils size={24} />, 
+      title: "食事を記録", 
+      desc: "カロリーを追加",
+      href: "/meals/new",
+      color: "from-orange-500/20 to-amber-500/10"
+    },
+    { 
+      icon: <Dumbbell size={24} />, 
+      title: "トレーニング", 
+      desc: "ワークアウト開始",
+      href: "/workouts/new",
+      color: "from-cyan-500/20 to-blue-500/10"
+    },
+    { 
+      icon: <Target size={24} />, 
+      title: "体重記録", 
+      desc: "進捗を更新",
+      href: "/goals/weight",
+      color: "from-green-500/20 to-emerald-500/10"
+    },
+  ]
+
+  const recentWorkouts = [
+    { name: "胸トレ", date: "今日", sets: 15, duration: "45分" },
+    { name: "背中トレ", date: "昨日", sets: 18, duration: "55分" },
+    { name: "脚トレ", date: "2日前", sets: 12, duration: "40分" },
+  ]
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 pt-6">
       {/* ヘッダー */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">
-          こんにちは、{session?.user?.name?.split(" ")[0] || "ユーザー"}さん！
-        </h1>
-        <p className="text-zinc-400 mt-1">{today}</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <p className="text-zinc-400 text-sm mb-1">おはようございます</p>
+        <h1 className="text-2xl font-bold text-white">今日も頑張ろう! 💪</h1>
+      </motion.div>
 
-      {/* クイックアクション */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <QuickActionCard
-          title="食事を記録"
-          description="今日の食事を記録しましょう"
-          href="/meals/new"
-          icon={
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          }
-          color="from-green-500 to-emerald-600"
-        />
-        <QuickActionCard
-          title="トレーニング開始"
-          description="今日のトレーニングを記録"
-          href="/workouts/new"
-          icon={
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          }
-          color="from-orange-500 to-red-600"
-        />
-        <QuickActionCard
-          title="体重を記録"
-          description="今日の体重を記録"
-          href="/goals"
-          icon={
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-            </svg>
-          }
-          color="from-blue-500 to-cyan-600"
-        />
-        <QuickActionCard
-          title="目標を設定"
-          description="新しい目標を設定"
-          href="/goals/new"
-          icon={
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-            </svg>
-          }
-          color="from-purple-500 to-pink-600"
-        />
-      </div>
-
-      {/* 今日のサマリー */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card title="今日のカロリー">
-          <div className="text-center py-4">
-            <div className="text-4xl font-bold text-white">0</div>
-            <div className="text-zinc-400 mt-1">/ 2,000 kcal</div>
-            <div className="mt-4 h-2 bg-zinc-700 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-orange-500 to-red-600 w-0"></div>
+      {/* 継続日数バナー */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+        className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-orange-500/5 border border-orange-500/20"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-orange-500/20">
+              <Flame size={24} className="text-orange-500" />
+            </div>
+            <div>
+              <p className="text-sm text-zinc-400">連続記録</p>
+              <p className="text-xl font-bold text-white">{stats.streak}日連続 🔥</p>
             </div>
           </div>
-        </Card>
+          <Trophy className="text-orange-500/50" size={40} />
+        </div>
+      </motion.div>
 
-        <Card title="今日のトレーニング">
-          <div className="text-center py-4">
-            <div className="text-4xl font-bold text-white">0</div>
-            <div className="text-zinc-400 mt-1">セット完了</div>
-            <p className="mt-4 text-sm text-zinc-500">
-              まだトレーニングを記録していません
+      {/* 今日のステータス */}
+      <StaggerContainer className="grid grid-cols-2 gap-4 mb-6">
+        <StaggerItem>
+          <AnimatedCard className="p-4" hover={false}>
+            <div className="flex items-center gap-2 mb-3">
+              <Flame size={18} className="text-orange-500" />
+              <span className="text-sm text-zinc-400">カロリー</span>
+            </div>
+            <p className="text-2xl font-bold text-white mb-2">
+              {stats.calories.consumed}
+              <span className="text-sm text-zinc-500 font-normal ml-1">/ {stats.calories.target} kcal</span>
             </p>
-          </div>
-        </Card>
+            <AnimatedProgressBar 
+              value={stats.calories.consumed} 
+              max={stats.calories.target}
+            />
+          </AnimatedCard>
+        </StaggerItem>
 
-        <Card title="目標達成状況">
-          <div className="text-center py-4">
-            <div className="text-4xl font-bold text-white">-</div>
-            <div className="text-zinc-400 mt-1">目標未設定</div>
-            <Link
-              href="/goals/new"
-              className="inline-block mt-4 text-sm text-orange-400 hover:text-orange-300"
-            >
-              目標を設定する →
+        <StaggerItem>
+          <AnimatedCard className="p-4" hover={false}>
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp size={18} className="text-cyan-500" />
+              <span className="text-sm text-zinc-400">タンパク質</span>
+            </div>
+            <p className="text-2xl font-bold text-white mb-2">
+              {stats.protein.consumed}
+              <span className="text-sm text-zinc-500 font-normal ml-1">/ {stats.protein.target} g</span>
+            </p>
+            <AnimatedProgressBar 
+              value={stats.protein.consumed} 
+              max={stats.protein.target}
+              color="bg-gradient-to-r from-cyan-500 to-blue-500"
+            />
+          </AnimatedCard>
+        </StaggerItem>
+      </StaggerContainer>
+
+      {/* クイックアクション */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mb-6"
+      >
+        <h2 className="text-lg font-bold text-white mb-4">クイックアクション</h2>
+        <div className="grid grid-cols-3 gap-3">
+          {quickActions.map((action, index) => (
+            <Link key={action.title} href={action.href}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex flex-col items-center p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 transition-colors"
+              >
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${action.color} text-orange-500 mb-2`}>
+                  {action.icon}
+                </div>
+                <p className="text-sm font-medium text-white text-center">{action.title}</p>
+                <p className="text-xs text-zinc-500">{action.desc}</p>
+              </motion.div>
             </Link>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* 今週のトレーニング */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mb-6"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-white">今週のトレーニング</h2>
+          <Link href="/workouts" className="flex items-center gap-1 text-sm text-orange-500">
+            すべて見る
+            <ChevronRight size={16} />
+          </Link>
+        </div>
+
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+          {["月", "火", "水", "木", "金", "土", "日"].map((day, index) => {
+            const isActive = index < stats.workouts
+            const isToday = index === 6
+            return (
+              <motion.div
+                key={day}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + index * 0.05 }}
+                className={`flex-shrink-0 w-10 h-14 rounded-xl flex flex-col items-center justify-center ${
+                  isToday 
+                    ? "bg-gradient-to-b from-orange-500 to-amber-500 text-white" 
+                    : isActive
+                      ? "bg-zinc-800 text-white"
+                      : "bg-zinc-900 text-zinc-600"
+                }`}
+              >
+                <span className="text-xs">{day}</span>
+                {isActive && !isToday && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1" />
+                )}
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {/* 最近のワークアウト */}
+        <StaggerContainer className="space-y-3">
+          {recentWorkouts.map((workout) => (
+            <StaggerItem key={workout.name}>
+              <AnimatedCard className="p-4" hover={true}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-zinc-800">
+                      <Dumbbell size={20} className="text-zinc-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-white">{workout.name}</p>
+                      <p className="text-sm text-zinc-500">{workout.date}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-zinc-300">{workout.sets} セット</p>
+                    <p className="text-xs text-zinc-500">{workout.duration}</p>
+                  </div>
+                </div>
+              </AnimatedCard>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      </motion.div>
+
+      {/* 目標達成状況 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-white">目標</h2>
+          <Link href="/goals" className="flex items-center gap-1 text-sm text-orange-500">
+            編集
+            <ChevronRight size={16} />
+          </Link>
+        </div>
+
+        <AnimatedCard variant="glow" className="p-5">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/10">
+              <Target size={28} className="text-orange-500" />
+            </div>
+            <div>
+              <p className="text-sm text-zinc-400">現在の目標</p>
+              <p className="text-xl font-bold text-white">ベンチプレス 100kg</p>
+            </div>
           </div>
-        </Card>
-      </div>
+          <div className="mb-3">
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-zinc-400">進捗</span>
+              <span className="text-white font-medium">80kg / 100kg</span>
+            </div>
+            <AnimatedProgressBar value={80} max={100} />
+          </div>
+          <p className="text-sm text-zinc-500">
+            あと <span className="text-orange-500 font-medium">20kg</span> で達成！
+          </p>
+        </AnimatedCard>
+      </motion.div>
 
-      {/* 最近のアクティビティ */}
-      <Card title="最近のアクティビティ">
-        <div className="text-center py-8 text-zinc-500">
-          <svg className="w-12 h-12 mx-auto mb-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          <p>まだアクティビティがありません</p>
-          <p className="text-sm mt-2">食事やトレーニングを記録して始めましょう！</p>
-        </div>
-      </Card>
+      {/* FAB */}
+      <FloatingActionButton
+        icon={<Plus size={28} />}
+        label="新規記録"
+        onClick={() => {}}
+      />
     </div>
-  );
+  )
 }
-
-function QuickActionCard({
-  title,
-  description,
-  href,
-  icon,
-  color,
-}: {
-  title: string;
-  description: string;
-  href: string;
-  icon: React.ReactNode;
-  color: string;
-}) {
-  return (
-    <Link href={href}>
-      <div className="group p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-all duration-200 hover:shadow-lg">
-        <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${color} mb-3`}>
-          <div className="text-white">{icon}</div>
-        </div>
-        <h3 className="font-semibold text-white group-hover:text-orange-400 transition-colors">
-          {title}
-        </h3>
-        <p className="text-sm text-zinc-500 mt-1">{description}</p>
-      </div>
-    </Link>
-  );
-}
-

@@ -1,251 +1,235 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { recordBodyComposition, getBodyCompositions } from "@/lib/actions/goals";
-import type { BodyComposition } from "@/lib/db/schema";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
+import { 
+  ArrowLeft, 
+  Scale,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Calendar
+} from "lucide-react"
+import { AnimatedCard } from "@/components/ui/animated-card"
+import { AnimatedButton } from "@/components/ui/animated-button"
+import { NumberInput, AnimatedTextarea } from "@/components/ui/animated-input"
+import { StaggerContainer, StaggerItem } from "@/components/ui/motion"
 
 export default function WeightRecordPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const router = useRouter()
+  const [weight, setWeight] = useState(75.5)
+  const [bodyFat, setBodyFat] = useState(15)
+  const [notes, setNotes] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const [recordDate, setRecordDate] = useState(new Date().toISOString().split("T")[0]);
-  const [weightKg, setWeightKg] = useState<number | undefined>();
-  const [bodyFatPercentage, setBodyFatPercentage] = useState<number | undefined>();
-  const [muscleMassKg, setMuscleMassKg] = useState<number | undefined>();
-  const [notes, setNotes] = useState("");
+  // サンプルデータ
+  const previousWeight = 75.2
+  const weeklyChange = weight - 74.2
+  const monthlyChange = weight - 72.5
 
-  const [recentRecords, setRecentRecords] = useState<BodyComposition[]>([]);
+  const handleSubmit = async () => {
+    setIsLoading(true)
+    // TODO: API呼び出し
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    router.push("/goals")
+  }
 
-  useEffect(() => {
-    async function loadRecords() {
-      const records = await getBodyCompositions(7);
-      setRecentRecords(records);
-    }
-    loadRecords();
-  }, [success]);
+  const getChangeIcon = (change: number) => {
+    if (change > 0) return <TrendingUp size={16} className="text-green-500" />
+    if (change < 0) return <TrendingDown size={16} className="text-red-500" />
+    return <Minus size={16} className="text-zinc-500" />
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    if (!weightKg) {
-      setError("体重を入力してください");
-      setIsLoading(false);
-      return;
-    }
-
-    const result = await recordBodyComposition({
-      recordDate,
-      weightKg,
-      bodyFatPercentage,
-      muscleMassKg,
-      notes: notes || undefined,
-    });
-
-    if (result.success) {
-      setSuccess(true);
-      setWeightKg(undefined);
-      setBodyFatPercentage(undefined);
-      setMuscleMassKg(undefined);
-      setNotes("");
-      setTimeout(() => setSuccess(false), 3000);
-    } else {
-      setError(result.error || "記録に失敗しました");
-    }
-
-    setIsLoading(false);
-  };
-
-  // 前回からの変化を計算
-  const lastRecord = recentRecords[0];
-  const weightChange = weightKg && lastRecord?.weightKg
-    ? weightKg - lastRecord.weightKg
-    : null;
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-500"
+    if (change < 0) return "text-red-500"
+    return "text-zinc-500"
+  }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="px-4 pt-6 pb-8">
       {/* ヘッダー */}
-      <div className="flex items-center gap-4">
-        <Link
-          href="/goals"
-          className="p-2 rounded-lg hover:bg-zinc-800 transition-colors"
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-4 mb-6"
+      >
+        <motion.button
+          onClick={() => router.back()}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="p-2 rounded-xl bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
         >
-          <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
+          <ArrowLeft size={24} />
+        </motion.button>
         <div>
-          <h1 className="text-2xl font-bold text-white">体重を記録</h1>
-          <p className="text-zinc-400 mt-1">今日の体重を記録しましょう</p>
+          <h1 className="text-xl font-bold text-white">体重を記録</h1>
+          <p className="text-sm text-zinc-400">今日の体重を入力</p>
         </div>
-      </div>
+      </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 基本情報 */}
-        <Card title="体重">
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="日付"
-                type="date"
-                value={recordDate}
-                onChange={(e) => setRecordDate(e.target.value)}
-                required
-              />
-              <Input
-                label="体重 (kg)"
-                type="number"
-                step="0.1"
-                placeholder="例: 70.5"
-                value={weightKg || ""}
-                onChange={(e) => setWeightKg(parseFloat(e.target.value) || undefined)}
-                required
-              />
-            </div>
+      {/* 日付 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="flex items-center gap-2 mb-6 text-zinc-400"
+      >
+        <Calendar size={18} />
+        <span>{new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}</span>
+      </motion.div>
 
-            {/* 変化表示 */}
-            {weightChange !== null && (
-              <div className="p-3 bg-zinc-800/50 rounded-lg">
-                <p className="text-sm text-zinc-400">
-                  前回からの変化:{" "}
-                  <span
-                    className={`font-medium ${
-                      weightChange > 0
-                        ? "text-red-400"
-                        : weightChange < 0
-                        ? "text-green-400"
-                        : "text-zinc-300"
-                    }`}
-                  >
-                    {weightChange > 0 ? "+" : ""}
-                    {weightChange.toFixed(1)} kg
-                  </span>
-                </p>
-              </div>
-            )}
-          </div>
-        </Card>
-
-        {/* 追加情報 */}
-        <Card title="追加情報（任意）">
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="体脂肪率 (%)"
-                type="number"
-                step="0.1"
-                placeholder="例: 15.5"
-                value={bodyFatPercentage || ""}
-                onChange={(e) => setBodyFatPercentage(parseFloat(e.target.value) || undefined)}
-              />
-              <Input
-                label="筋肉量 (kg)"
-                type="number"
-                step="0.1"
-                placeholder="例: 55.0"
-                value={muscleMassKg || ""}
-                onChange={(e) => setMuscleMassKg(parseFloat(e.target.value) || undefined)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                メモ
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="例: 朝食前に計測"
-                className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
-                rows={2}
-              />
+      {/* 体重入力 */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+        className="mb-6"
+      >
+        <AnimatedCard variant="glow" className="p-6" hover={false}>
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/10">
+              <Scale size={32} className="text-orange-500" />
             </div>
           </div>
-        </Card>
-
-        {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-            {error}
+          
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setWeight(w => Math.max(0, w - 0.1))}
+              className="w-14 h-14 rounded-full bg-zinc-800 text-white text-2xl font-bold hover:bg-zinc-700 transition-colors"
+            >
+              −
+            </motion.button>
+            
+            <div className="text-center">
+              <input
+                type="number"
+                value={weight}
+                onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
+                step="0.1"
+                className="w-32 text-center text-5xl font-bold text-white bg-transparent focus:outline-none"
+              />
+              <p className="text-zinc-400 text-lg">kg</p>
+            </div>
+            
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setWeight(w => w + 0.1)}
+              className="w-14 h-14 rounded-full bg-zinc-800 text-white text-2xl font-bold hover:bg-zinc-700 transition-colors"
+            >
+              +
+            </motion.button>
           </div>
-        )}
 
-        {success && (
-          <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
-            記録しました！
+          {/* 前回との比較 */}
+          <div className="flex items-center justify-center gap-2 text-sm">
+            {getChangeIcon(weight - previousWeight)}
+            <span className={getChangeColor(weight - previousWeight)}>
+              {weight > previousWeight ? "+" : ""}{(weight - previousWeight).toFixed(1)}kg
+            </span>
+            <span className="text-zinc-500">（前回比）</span>
           </div>
-        )}
+        </AnimatedCard>
+      </motion.div>
 
-        {/* 送信ボタン */}
-        <Button
-          type="submit"
+      {/* 体脂肪率（オプション） */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mb-6"
+      >
+        <AnimatedCard className="p-4" hover={false}>
+          <p className="text-sm text-zinc-400 mb-3">体脂肪率（任意）</p>
+          <div className="flex items-center justify-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setBodyFat(bf => Math.max(0, bf - 0.5))}
+              className="w-10 h-10 rounded-full bg-zinc-800 text-white font-bold hover:bg-zinc-700 transition-colors"
+            >
+              −
+            </motion.button>
+            
+            <div className="text-center">
+              <span className="text-3xl font-bold text-white">{bodyFat.toFixed(1)}</span>
+              <span className="text-zinc-400 text-lg ml-1">%</span>
+            </div>
+            
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setBodyFat(bf => Math.min(50, bf + 0.5))}
+              className="w-10 h-10 rounded-full bg-zinc-800 text-white font-bold hover:bg-zinc-700 transition-colors"
+            >
+              +
+            </motion.button>
+          </div>
+        </AnimatedCard>
+      </motion.div>
+
+      {/* 変化サマリー */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="grid grid-cols-2 gap-3 mb-6"
+      >
+        <AnimatedCard className="p-4 text-center" hover={false}>
+          <p className="text-xs text-zinc-500 mb-1">週間変化</p>
+          <div className="flex items-center justify-center gap-1">
+            {getChangeIcon(weeklyChange)}
+            <span className={`text-xl font-bold ${getChangeColor(weeklyChange)}`}>
+              {weeklyChange > 0 ? "+" : ""}{weeklyChange.toFixed(1)}kg
+            </span>
+          </div>
+        </AnimatedCard>
+        <AnimatedCard className="p-4 text-center" hover={false}>
+          <p className="text-xs text-zinc-500 mb-1">月間変化</p>
+          <div className="flex items-center justify-center gap-1">
+            {getChangeIcon(monthlyChange)}
+            <span className={`text-xl font-bold ${getChangeColor(monthlyChange)}`}>
+              {monthlyChange > 0 ? "+" : ""}{monthlyChange.toFixed(1)}kg
+            </span>
+          </div>
+        </AnimatedCard>
+      </motion.div>
+
+      {/* メモ */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mb-8"
+      >
+        <AnimatedTextarea
+          label="メモ（任意）"
+          placeholder="体調や食事に関するメモ..."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </motion.div>
+
+      {/* 保存ボタン */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <AnimatedButton
+          onClick={handleSubmit}
+          isLoading={isLoading}
+          variant="primary"
           size="lg"
           className="w-full"
-          isLoading={isLoading}
         >
-          記録する
-        </Button>
-      </form>
-
-      {/* 最近の記録 */}
-      {recentRecords.length > 0 && (
-        <Card title="最近の記録">
-          <div className="space-y-2">
-            {recentRecords.map((record, index) => {
-              const prevRecord = recentRecords[index + 1];
-              const change = prevRecord?.weightKg && record.weightKg
-                ? record.weightKg - prevRecord.weightKg
-                : null;
-
-              return (
-                <div
-                  key={record.id}
-                  className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg"
-                >
-                  <div>
-                    <p className="text-sm text-zinc-400">
-                      {new Date(record.recordDate).toLocaleDateString("ja-JP", {
-                        month: "short",
-                        day: "numeric",
-                        weekday: "short",
-                      })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-white font-medium">
-                      {record.weightKg} kg
-                    </span>
-                    {change !== null && (
-                      <span
-                        className={`text-xs ${
-                          change > 0
-                            ? "text-red-400"
-                            : change < 0
-                            ? "text-green-400"
-                            : "text-zinc-500"
-                        }`}
-                      >
-                        {change > 0 ? "+" : ""}
-                        {change.toFixed(1)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
+          記録を保存
+        </AnimatedButton>
+      </motion.div>
     </div>
-  );
+  )
 }
-
-
-

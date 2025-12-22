@@ -33,13 +33,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    console.log("Starting Google sign in...");
+    console.log("Callback URL:", callbackUrl);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      console.log("Starting Google sign in...");
-      console.log("Callback URL:", callbackUrl);
-      
       const result = await signIn.social({
         provider: "google",
         callbackURL: callbackUrl,
@@ -72,44 +72,52 @@ export default function LoginPage() {
       if (result?.data) {
         const data = result.data as SignInData;
         
-        // redirect: true が含まれている場合、自動リダイレクトが期待される
-        // しかし、リダイレクトが発生しない場合は手動でリダイレクト
+        // redirect: true が含まれている場合、OAuthプロバイダーにリダイレクト
         if (data.redirect && (data.url || data.redirectUrl)) {
           const redirectUrl = data.url || data.redirectUrl;
           if (redirectUrl && typeof redirectUrl === "string") {
             console.log("Redirecting to OAuth provider:", redirectUrl);
-            // 状態更新を避けて、即座にリダイレクトを実行
-            // Reactの再レンダリングを待たずにリダイレクト
-            // Vercel環境では、window.location.hrefが動作しない場合があるため、
-            // 直接document.locationを使用
-            if (typeof window !== "undefined" && typeof document !== "undefined") {
-              // document.locationを使用して確実にリダイレクト
-              document.location.href = redirectUrl;
+            // 複数の方法でリダイレクトを試行（Vercel環境での確実なリダイレクトのため）
+            if (typeof window !== "undefined") {
+              // 方法1: window.location.replace (履歴に残さない)
+              window.location.replace(redirectUrl);
+              // 方法2: フォールバックとしてwindow.location.href
+              setTimeout(() => {
+                if (window.location.href !== redirectUrl) {
+                  window.location.href = redirectUrl;
+                }
+              }, 100);
             }
-            // リダイレクトが確実に実行されるように、処理を停止
+            // 状態更新を避けるため、ここで処理を停止
             return;
           }
         }
         
-        // result.dataにリダイレクトURLが含まれている場合
+        // result.dataにリダイレクトURLが含まれている場合（redirect: falseの場合）
         const redirectUrl = data.url || data.redirectUrl;
         if (redirectUrl && typeof redirectUrl === "string") {
           console.log("Redirecting to:", redirectUrl);
-          window.location.assign(redirectUrl);
+          if (typeof window !== "undefined") {
+            window.location.replace(redirectUrl);
+          }
           return;
         }
         
         // セッションが作成された場合、callbackURLにリダイレクト
         if (data.session || data.user) {
           console.log("Session created, redirecting to:", callbackUrl);
-          window.location.assign(callbackUrl);
+          if (typeof window !== "undefined") {
+            window.location.replace(callbackUrl);
+          }
           return;
         }
       }
       
       // リダイレクトが発生しない場合、手動でリダイレクト
       console.log("No automatic redirect, manually redirecting to:", callbackUrl);
-      window.location.assign(callbackUrl);
+      if (typeof window !== "undefined") {
+        window.location.replace(callbackUrl);
+      }
     } catch (err) {
       console.error("Sign in error:", err);
       const errorMessage = err instanceof Error ? err.message : "不明なエラー";

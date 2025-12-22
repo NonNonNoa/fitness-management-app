@@ -35,9 +35,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={inter.variable}>
-      <head>
-        <link rel="apple-touch-icon" href="/icon-192.png" />
-      </head>
       <body className="bg-zinc-950 text-white antialiased">
         <ToastProvider>
           {children}

@@ -26,6 +26,14 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     },
   },
+  callbacks: {
+    onOAuthCallback: {
+      redirect: {
+        onSuccess: "/dashboard",
+        onError: "/login",
+      },
+    },
+  },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day

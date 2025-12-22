@@ -1,13 +1,47 @@
+/**
+ * @fileoverview カードコンポーネント
+ * コンテンツを囲むためのカードUIコンポーネント
+ */
+
 import { ReactNode } from "react";
 
+/**
+ * カードコンポーネントのプロパティ
+ */
 interface CardProps {
+  /** カードの内容 */
   children: ReactNode;
+  /** 追加のCSSクラス */
   className?: string;
+  /** カードのタイトル */
   title?: string;
+  /** カードの説明文 */
   description?: string;
+  /** カードのフッター */
   footer?: ReactNode;
 }
 
+/**
+ * 汎用カードコンポーネント
+ * タイトル、説明、フッターをオプションで表示可能
+ * @param {CardProps} props - カードのプロパティ
+ * @returns {JSX.Element} カード要素
+ * @example
+ * // シンプルなカード
+ * <Card>
+ *   <p>コンテンツ</p>
+ * </Card>
+ * 
+ * // タイトル付きカード
+ * <Card title="設定" description="アカウント設定を管理します">
+ *   <form>...</form>
+ * </Card>
+ * 
+ * // フッター付きカード
+ * <Card footer={<Button>保存</Button>}>
+ *   <p>編集内容</p>
+ * </Card>
+ */
 export function Card({
   children,
   className = "",
@@ -38,4 +72,3 @@ export function Card({
     </div>
   );
 }
-

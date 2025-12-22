@@ -1,3 +1,7 @@
+/**
+ * @fileoverview 通知に関するサーバーアクション
+ * 通知の取得、作成、既読管理、削除などの操作を提供する
+ */
 "use server";
 
 import { db } from "@/lib/db";
@@ -6,6 +10,11 @@ import { eq, and, desc } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { generateId } from "@/lib/utils";
 
+/**
+ * ユーザーの通知一覧を取得する
+ * @param {number} [limit=20] - 取得件数
+ * @returns {Promise<{success: boolean, data?: Array, error?: string}>} 通知一覧（作成日降順）
+ */
 export async function getNotifications(limit = 20) {
   try {
     const session = await requireSession();
@@ -24,6 +33,10 @@ export async function getNotifications(limit = 20) {
   }
 }
 
+/**
+ * 未読通知の件数を取得する
+ * @returns {Promise<{success: boolean, count?: number, error?: string}>} 未読件数
+ */
 export async function getUnreadCount() {
   try {
     const session = await requireSession();
@@ -45,6 +58,11 @@ export async function getUnreadCount() {
   }
 }
 
+/**
+ * 指定の通知を既読にする
+ * @param {string} notificationId - 通知ID
+ * @returns {Promise<{success: boolean, error?: string}>} 更新結果
+ */
 export async function markAsRead(notificationId: string) {
   try {
     const session = await requireSession();
@@ -66,6 +84,10 @@ export async function markAsRead(notificationId: string) {
   }
 }
 
+/**
+ * 全ての通知を既読にする
+ * @returns {Promise<{success: boolean, error?: string}>} 更新結果
+ */
 export async function markAllAsRead() {
   try {
     const session = await requireSession();
@@ -82,6 +104,25 @@ export async function markAllAsRead() {
   }
 }
 
+/**
+ * 通知タイプの型定義
+ * - reminder: リマインダー
+ * - achievement: 実績達成
+ * - goal: 目標関連
+ * - system: システム通知
+ */
+type NotificationType = "reminder" | "achievement" | "goal" | "system";
+
+/**
+ * 新しい通知を作成する
+ * @param {Object} params - 通知パラメータ
+ * @param {string} params.userId - 対象ユーザーID
+ * @param {NotificationType} params.type - 通知タイプ
+ * @param {string} params.title - 通知タイトル
+ * @param {string} params.message - 通知メッセージ
+ * @param {string} [params.actionUrl] - アクションURL（オプション）
+ * @returns {Promise<{success: boolean, data?: Object, error?: string}>} 作成された通知
+ */
 export async function createNotification({
   userId,
   type,
@@ -90,7 +131,7 @@ export async function createNotification({
   actionUrl,
 }: {
   userId: string;
-  type: "reminder" | "achievement" | "goal" | "system";
+  type: NotificationType;
   title: string;
   message: string;
   actionUrl?: string;
@@ -112,6 +153,11 @@ export async function createNotification({
   }
 }
 
+/**
+ * 通知を削除する
+ * @param {string} notificationId - 削除する通知のID
+ * @returns {Promise<{success: boolean, error?: string}>} 削除結果
+ */
 export async function deleteNotification(notificationId: string) {
   try {
     const session = await requireSession();
@@ -131,5 +177,3 @@ export async function deleteNotification(notificationId: string) {
     return { success: false, error: "Failed to delete notification" };
   }
 }
-
-

@@ -20,6 +20,7 @@ interface DashboardData {
   targetCalories: number;
   todayWorkoutSets: number;
   activeGoal: { type: string; current: number; target: number } | null;
+  targetWeightKg: number | null;
   weightHistory: { date: string; weight: number }[];
   calorieHistory: { date: string; calories: number; target: number }[];
   recentActivity: { type: string; title: string; date: string }[];
@@ -52,6 +53,11 @@ export default function DashboardPage() {
             current: goalsResult.data[0].currentValue || 0,
             target: goalsResult.data[0].targetValue || 0,
           }
+        : null;
+
+      // 目標体重を取得（アクティブな目標から最初に見つかったものを使用）
+      const targetWeightKg = goalsResult.success && goalsResult.data
+        ? goalsResult.data.find((g: { targetWeightKg?: number | null }) => g.targetWeightKg)?.targetWeightKg || null
         : null;
 
       const weightHistory = bodyCompsResult.success && bodyCompsResult.data
@@ -96,6 +102,7 @@ export default function DashboardPage() {
         targetCalories: 2000,
         todayWorkoutSets: todayWorkoutsResult.success ? todayWorkoutsResult.data?.length || 0 : 0,
         activeGoal,
+        targetWeightKg,
         weightHistory,
         calorieHistory,
         recentActivity: recentActivity.slice(0, 5),
@@ -198,7 +205,10 @@ export default function DashboardPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartContainer title="体重推移" delay={0.4}>
-          <WeightChart data={data?.weightHistory || []} />
+          <WeightChart 
+            data={data?.weightHistory || []} 
+            targetWeight={data?.targetWeightKg || undefined}
+          />
         </ChartContainer>
         <ChartContainer title="カロリー摂取" delay={0.5}>
           <CalorieChart data={data?.calorieHistory || []} />

@@ -120,7 +120,7 @@ export function WeightChart({ data, targetWeight }: WeightChartProps) {
               borderRadius: "8px",
             }}
             labelStyle={{ color: "#fff" }}
-            formatter={(value: number) => [`${value}kg`, "体重"]}
+            formatter={(value) => [`${value}kg`, "体重"]}
           />
           {targetWeight && (
             <ReferenceLine 

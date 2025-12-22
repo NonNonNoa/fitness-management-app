@@ -10,6 +10,8 @@ import { eq, and, desc, gte, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { calculateCaloriesBurned } from "@/lib/utils/calorie-calculator";
+import { getRecentBodyCompositions } from "./goals";
 
 /**
  * UUIDを生成する
@@ -402,8 +404,21 @@ export async function updateWorkout(workoutId: string, data: WorkoutFormData) {
       0
     );
 
-    // 消費カロリーを推定 (簡易計算: セット数 × 10kcal程度)
-    const caloriesBurned = data.sets.length * 10;
+    // ユーザーの最新体重を取得
+    const bodyCompsResult = await getRecentBodyCompositions(1);
+    const latestWeight = bodyCompsResult.success && bodyCompsResult.data && bodyCompsResult.data.length > 0
+      ? bodyCompsResult.data[0].weightKg || 70
+      : 70;
+
+    // 消費カロリーを計算（メッツ値を使用）
+    // 時間が未入力の場合は、セット数から推定（1セットあたり3分程度）
+    const estimatedDuration = data.durationMinutes || (data.sets.length * 3);
+    const caloriesBurned = calculateCaloriesBurned(
+      latestWeight,
+      estimatedDuration,
+      totalVolume,
+      data.sets.length
+    );
 
     // ワークアウトレコードを更新
     await db

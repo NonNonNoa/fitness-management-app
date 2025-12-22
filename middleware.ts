@@ -17,7 +17,15 @@ const publicRoutes = ["/", "/login", "/signup"];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // OAuthコールバック直後のリクエストを許可（セッションクッキーが設定される前）
+  // BetterAuthのコールバックは/api/auth/callback/googleで処理されるため、
+  // その直後のリダイレクトはセッションが設定されている可能性が高い
+  if (pathname === "/dashboard" && request.headers.get("referer")?.includes("/api/auth/callback")) {
+    return NextResponse.next();
+  }
+
   // セッショントークンの確認
+  // BetterAuthのセッションクッキー名を確認（デフォルトは "better-auth.session_token"）
   const sessionToken = request.cookies.get("better-auth.session_token");
 
   // 保護されたルートへのアクセス

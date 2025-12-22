@@ -78,8 +78,8 @@ export default function LoginPage() {
           const redirectUrl = data.url || data.redirectUrl;
           if (redirectUrl && typeof redirectUrl === "string") {
             console.log("Redirecting to OAuth provider:", redirectUrl);
-            // window.location.replace()を使用して、ブラウザの履歴に残さない
-            window.location.replace(redirectUrl);
+            // 即座にリダイレクトを実行
+            window.location.href = redirectUrl;
             return;
           }
         }
@@ -88,21 +88,22 @@ export default function LoginPage() {
         const redirectUrl = data.url || data.redirectUrl;
         if (redirectUrl && typeof redirectUrl === "string") {
           console.log("Redirecting to:", redirectUrl);
-          window.location.replace(redirectUrl);
+          // 即座にリダイレクトを実行
+          window.location.href = redirectUrl;
           return;
         }
         
         // セッションが作成された場合、callbackURLにリダイレクト
         if (data.session || data.user) {
           console.log("Session created, redirecting to:", callbackUrl);
-          window.location.replace(callbackUrl);
+          window.location.href = callbackUrl;
           return;
         }
       }
       
       // リダイレクトが発生しない場合、手動でリダイレクト
       console.log("No automatic redirect, manually redirecting to:", callbackUrl);
-      window.location.replace(callbackUrl);
+      window.location.href = callbackUrl;
     } catch (err) {
       console.error("Sign in error:", err);
       const errorMessage = err instanceof Error ? err.message : "不明なエラー";
@@ -163,7 +164,10 @@ export default function LoginPage() {
               variant="outline"
               size="lg"
               className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 hover:bg-zinc-100 border-0"
-              onClick={handleGoogleSignIn}
+              onClick={(e) => {
+                e.preventDefault();
+                handleGoogleSignIn();
+              }}
               isLoading={isLoading}
             >
               {!isLoading && (

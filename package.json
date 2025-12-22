@@ -11,7 +11,8 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "check-env": "node scripts/check-env.js"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",

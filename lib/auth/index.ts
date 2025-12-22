@@ -8,6 +8,8 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || (process.env.NODE_ENV === "production" 
     ? undefined 
     : "dev-secret-key-minimum-32-characters-long-for-development-only"),
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === "production" ? undefined : "http://localhost:3000"),
+  basePath: "/api/auth",
   database: drizzleAdapter(db, {
     provider: "sqlite",
     schema: {
@@ -24,14 +26,6 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    },
-  },
-  callbacks: {
-    onOAuthCallback: {
-      redirect: {
-        onSuccess: "/dashboard",
-        onError: "/login",
-      },
     },
   },
   session: {

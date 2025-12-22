@@ -17,9 +17,20 @@ function createDbClient() {
   const url = process.env.TURSO_DATABASE_URL;
   const authToken = process.env.TURSO_AUTH_TOKEN;
 
+  // デバッグ情報（本番環境ではログに出力）
   if (!url) {
+    const envKeys = Object.keys(process.env).filter(key => 
+      key.includes('TURSO') || key.includes('DATABASE')
+    );
+    console.error('[DB] Environment variables check:', {
+      hasUrl: !!url,
+      hasToken: !!authToken,
+      availableKeys: envKeys,
+      nodeEnv: process.env.NODE_ENV,
+    });
     throw new Error(
-      "TURSO_DATABASE_URL is not set. Please set it in your environment variables."
+      "TURSO_DATABASE_URL is not set. Please set it in your environment variables. " +
+      `Available env keys: ${envKeys.join(', ')}`
     );
   }
 

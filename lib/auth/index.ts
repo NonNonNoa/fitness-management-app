@@ -30,9 +30,33 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
   },
-  trustedOrigins: [
-    process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  ],
+  trustedOrigins: (() => {
+    const origins: string[] = [];
+    
+    // ローカル開発環境
+    if (process.env.NODE_ENV !== "production") {
+      origins.push("http://localhost:3000");
+    }
+    
+    // 本番環境のURL（BETTER_AUTH_URL）
+    if (process.env.BETTER_AUTH_URL) {
+      origins.push(process.env.BETTER_AUTH_URL);
+    }
+    
+    // VercelのプレビューURL（VERCEL_URL環境変数から自動取得）
+    // Vercelは自動的にVERCEL_URL環境変数を設定します
+    if (process.env.VERCEL_URL) {
+      origins.push(`https://${process.env.VERCEL_URL}`);
+    }
+    
+    // NEXT_PUBLIC_APP_URLも追加
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+      origins.push(process.env.NEXT_PUBLIC_APP_URL);
+    }
+    
+    // 重複を削除
+    return [...new Set(origins)];
+  })(),
 });
 
 export async function getSession() {

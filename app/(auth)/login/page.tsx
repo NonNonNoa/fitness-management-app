@@ -80,9 +80,13 @@ export default function LoginPage() {
             console.log("Redirecting to OAuth provider:", redirectUrl);
             // 状態更新を避けて、即座にリダイレクトを実行
             // Reactの再レンダリングを待たずにリダイレクト
-            setTimeout(() => {
-              window.location.href = redirectUrl;
-            }, 100);
+            // Vercel環境では、window.location.hrefが動作しない場合があるため、
+            // 直接document.locationを使用
+            if (typeof window !== "undefined" && typeof document !== "undefined") {
+              // document.locationを使用して確実にリダイレクト
+              document.location.href = redirectUrl;
+            }
+            // リダイレクトが確実に実行されるように、処理を停止
             return;
           }
         }
@@ -91,28 +95,21 @@ export default function LoginPage() {
         const redirectUrl = data.url || data.redirectUrl;
         if (redirectUrl && typeof redirectUrl === "string") {
           console.log("Redirecting to:", redirectUrl);
-          // 状態更新を避けて、即座にリダイレクトを実行
-          setTimeout(() => {
-            window.location.href = redirectUrl;
-          }, 100);
+          window.location.assign(redirectUrl);
           return;
         }
         
         // セッションが作成された場合、callbackURLにリダイレクト
         if (data.session || data.user) {
           console.log("Session created, redirecting to:", callbackUrl);
-          setTimeout(() => {
-            window.location.href = callbackUrl;
-          }, 100);
+          window.location.assign(callbackUrl);
           return;
         }
       }
       
       // リダイレクトが発生しない場合、手動でリダイレクト
       console.log("No automatic redirect, manually redirecting to:", callbackUrl);
-      setTimeout(() => {
-        window.location.href = callbackUrl;
-      }, 100);
+      window.location.assign(callbackUrl);
     } catch (err) {
       console.error("Sign in error:", err);
       const errorMessage = err instanceof Error ? err.message : "不明なエラー";
@@ -173,10 +170,7 @@ export default function LoginPage() {
               variant="outline"
               size="lg"
               className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 hover:bg-zinc-100 border-0"
-              onClick={(e) => {
-                e.preventDefault();
-                handleGoogleSignIn();
-              }}
+              onClick={handleGoogleSignIn}
               isLoading={isLoading}
             >
               {!isLoading && (

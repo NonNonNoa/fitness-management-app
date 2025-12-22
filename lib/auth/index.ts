@@ -5,6 +5,9 @@ import * as schema from "@/lib/db/schema";
 import { headers } from "next/headers";
 
 export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET || (process.env.NODE_ENV === "production" 
+    ? undefined 
+    : "dev-secret-key-minimum-32-characters-long-for-development-only"),
   database: drizzleAdapter(db, {
     provider: "sqlite",
     schema: {
@@ -19,8 +22,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     },
   },
   session: {

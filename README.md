@@ -406,6 +406,40 @@ rm -rf .next
 npm run build
 ```
 
+## 🚀 Vercelへのデプロイ
+
+### クイックスタート
+
+1. **Vercel CLIをインストール**:
+```bash
+npm install -g vercel
+```
+
+2. **Vercelにログイン**:
+```bash
+vercel login
+```
+
+3. **デプロイ**:
+```bash
+vercel --prod
+```
+
+### 環境変数の設定
+
+Vercelダッシュボードで以下の環境変数を設定してください：
+
+- `TURSO_DATABASE_URL`
+- `TURSO_AUTH_TOKEN`
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_URL` (デプロイ後のURL)
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `OPENAI_API_KEY` (オプション)
+- `NEXT_PUBLIC_APP_URL` (デプロイ後のURL)
+
+**詳細な手順**: `docs/vercel-deployment.md` を参照してください。
+
 ## 📚 参考資料
 
 ### 公式ドキュメント
@@ -418,6 +452,7 @@ npm run build
 - [BetterAuth Documentation](https://www.better-auth.com/docs)
 - [OpenAI API Documentation](https://platform.openai.com/docs)
 - [Drizzle ORM Documentation](https://orm.drizzle.team/)
+- [Vercel Documentation](https://vercel.com/docs)
 
 ### プロジェクト内ドキュメント
 
@@ -427,6 +462,7 @@ npm run build
 - `docs/tech-stack.md`: 技術スタック詳細
 - `docs/setup-guide.md`: セットアップガイド（詳細版）
 - `docs/development-guidelines.md`: 開発ガイドライン
+- `docs/vercel-deployment.md`: Vercelデプロイガイド
 
 ### その他の参考リンク
 

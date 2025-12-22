@@ -1,3 +1,7 @@
+/**
+ * @fileoverview 実績（アチーブメント）に関するサーバーアクション
+ * 実績の取得、付与、初期化などの操作を提供する
+ */
 "use server";
 
 import { db } from "@/lib/db";
@@ -6,6 +10,11 @@ import { eq, and } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { generateId } from "@/lib/utils";
 
+/**
+ * ユーザーが獲得した実績一覧を取得する
+ * @returns {Promise<{success: boolean, data?: Array, error?: string}>} ユーザーの実績データ
+ * @description 各実績には進捗状況と完了ステータスが含まれる
+ */
 export async function getUserAchievements() {
   try {
     const session = await requireSession();
@@ -30,6 +39,10 @@ export async function getUserAchievements() {
   }
 }
 
+/**
+ * 全ての実績定義を取得する
+ * @returns {Promise<{success: boolean, data?: Array, error?: string}>} 全実績のリスト
+ */
 export async function getAllAchievements() {
   try {
     const result = await db.select().from(achievements);
@@ -40,6 +53,13 @@ export async function getAllAchievements() {
   }
 }
 
+/**
+ * 実績の進捗を確認し、条件を満たしていれば付与する
+ * @param {string} achievementId - 実績ID
+ * @param {number} [progress=100] - 進捗率 (0-100)
+ * @returns {Promise<{success: boolean, alreadyEarned?: boolean, completed?: boolean, error?: string}>} 付与結果
+ * @description 進捗が100%に達すると実績が完了となる
+ */
 export async function checkAndAwardAchievement(
   achievementId: string,
   progress: number = 100
@@ -47,7 +67,7 @@ export async function checkAndAwardAchievement(
   try {
     const session = await requireSession();
 
-    // Check if already earned
+    // 既に獲得済みかチェック
     const existing = await db
       .select()
       .from(userAchievements)
@@ -65,11 +85,13 @@ export async function checkAndAwardAchievement(
     const isCompleted = progress >= 100;
 
     if (existing.length > 0) {
+      // 既存レコードを更新
       await db
         .update(userAchievements)
         .set({ progress, isCompleted, earnedAt: isCompleted ? new Date() : existing[0].earnedAt })
         .where(eq(userAchievements.id, existing[0].id));
     } else {
+      // 新規レコードを作成
       await db.insert(userAchievements).values({
         id: generateId(),
         userId: session.user.id,
@@ -86,9 +108,16 @@ export async function checkAndAwardAchievement(
   }
 }
 
+/**
+ * デフォルトの実績定義を初期化する
+ * @returns {Promise<{success: boolean, error?: string}>} 初期化結果
+ * @description アプリケーション起動時やデータベースセットアップ時に呼び出す
+ * 既に存在する実績はスキップされる
+ */
 export async function initializeAchievements() {
+  /** デフォルトの実績定義 */
   const defaultAchievements = [
-    // Workout achievements
+    // トレーニング実績
     {
       id: "first_workout",
       name: "最初の一歩",
@@ -116,7 +145,7 @@ export async function initializeAchievements() {
       requirement: JSON.stringify({ type: "workout_count", value: 50 }),
       points: 200,
     },
-    // Meal achievements
+    // 食事実績
     {
       id: "first_meal",
       name: "食事記録開始",
@@ -135,7 +164,7 @@ export async function initializeAchievements() {
       requirement: JSON.stringify({ type: "meal_streak", value: 7 }),
       points: 100,
     },
-    // Goal achievements
+    // 目標実績
     {
       id: "first_goal",
       name: "目標設定",
@@ -154,7 +183,7 @@ export async function initializeAchievements() {
       requirement: JSON.stringify({ type: "goal_achieved", value: 1 }),
       points: 150,
     },
-    // Streak achievements
+    // 連続ログイン実績
     {
       id: "streak_3",
       name: "3日連続",
@@ -182,7 +211,7 @@ export async function initializeAchievements() {
       requirement: JSON.stringify({ type: "login_streak", value: 30 }),
       points: 300,
     },
-    // Milestone achievements
+    // マイルストーン実績
     {
       id: "volume_1000",
       name: "1トンリフト",
@@ -223,5 +252,3 @@ export async function initializeAchievements() {
     return { success: false, error: "Failed to initialize achievements" };
   }
 }
-
-

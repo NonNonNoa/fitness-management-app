@@ -19,20 +19,37 @@ Turso (SQLite) を使用したデータベース設計書。
 | updated_at | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 更新日時 |
 
 ### 2. goals（目標）
-ユーザーの目標設定を格納。
+ユーザーの目標設定を格納。目標タイプに応じて使用するカラムが異なる。
 
-| カラム名 | 型 | 制約 | 説明 |
-|---------|-----|------|------|
-| id | TEXT | PRIMARY KEY | 目標ID（UUID） |
-| user_id | TEXT | NOT NULL, FOREIGN KEY | ユーザーID |
-| goal_type | TEXT | NOT NULL | 目標タイプ（muscle_gain, weight_loss, weight_gain, strength, endurance） |
-| target_value | REAL | | 目標値（体重、重量など） |
-| current_value | REAL | | 現在値 |
-| start_date | DATE | NOT NULL | 開始日 |
-| target_date | DATE | | 目標達成日 |
-| is_active | INTEGER | NOT NULL, DEFAULT 1 | アクティブフラグ（0 or 1） |
-| created_at | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 作成日時 |
-| updated_at | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 更新日時 |
+| カラム名 | 型 | 制約 | 説明 | 使用する目標タイプ |
+|---------|-----|------|------|---------------------|
+| id | TEXT | PRIMARY KEY | 目標ID（UUID） | 全タイプ |
+| user_id | TEXT | NOT NULL, FOREIGN KEY | ユーザーID | 全タイプ |
+| goal_type | TEXT | NOT NULL | 目標タイプ（muscle_gain, weight_loss, weight_gain, strength） | 全タイプ |
+| target_value | REAL | | 目標重量（kg） | strength |
+| current_value | REAL | | 現在重量（kg） | strength |
+| target_weight_kg | REAL | | 目標体重（kg） | weight_loss, weight_gain |
+| current_weight_kg | REAL | | 現在体重（kg） | weight_loss, weight_gain |
+| target_muscle_mass_kg | REAL | | 目標筋肉量（kg） | muscle_gain |
+| current_muscle_mass_kg | REAL | | 現在筋肉量（kg） | muscle_gain |
+| target_arm_cm | REAL | | 目標腕回り（cm） | muscle_gain |
+| current_arm_cm | REAL | | 現在腕回り（cm） | muscle_gain |
+| target_chest_cm | REAL | | 目標胸囲（cm） | muscle_gain |
+| current_chest_cm | REAL | | 現在胸囲（cm） | muscle_gain |
+| target_waist_cm | REAL | | 目標ウエスト（cm） | muscle_gain |
+| current_waist_cm | REAL | | 現在ウエスト（cm） | muscle_gain |
+| exercise_name | TEXT | | 種目名 | strength |
+| start_date | DATE | NOT NULL | 開始日 | 全タイプ |
+| target_date | DATE | | 目標達成日 | 全タイプ |
+| is_active | INTEGER | NOT NULL, DEFAULT 1 | アクティブフラグ（0 or 1） | 全タイプ |
+| created_at | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 作成日時 | 全タイプ |
+| updated_at | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 更新日時 | 全タイプ |
+
+**目標タイプ別の使用カラム**:
+- **weight_loss（減量）**: current_weight_kg, target_weight_kg
+- **weight_gain（増量）**: current_weight_kg, target_weight_kg
+- **strength（筋力向上）**: exercise_name, current_value, target_value
+- **muscle_gain（筋肉量アップ）**: 筋肉量・ボディサイズ関連カラム（すべて任意）
 
 **インデックス**: user_id, goal_type, is_active
 

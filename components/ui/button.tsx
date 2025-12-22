@@ -1,13 +1,37 @@
+/**
+ * @fileoverview 再利用可能なボタンコンポーネント
+ * 複数のバリアントとサイズをサポートするカスタムボタン
+ */
 "use client";
 
 import { forwardRef, ButtonHTMLAttributes } from "react";
 
+/**
+ * ボタンコンポーネントのプロパティ
+ */
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** ボタンのスタイルバリアント */
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
+  /** ボタンのサイズ */
   size?: "sm" | "md" | "lg";
+  /** ローディング状態 */
   isLoading?: boolean;
 }
 
+/**
+ * カスタマイズ可能なボタンコンポーネント
+ * @param {ButtonProps} props - ボタンのプロパティ
+ * @returns {JSX.Element} ボタン要素
+ * @example
+ * // プライマリボタン
+ * <Button variant="primary" size="lg">送信</Button>
+ * 
+ * // ローディング状態
+ * <Button isLoading>処理中</Button>
+ * 
+ * // アウトラインボタン
+ * <Button variant="outline">キャンセル</Button>
+ */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -83,4 +107,3 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = "Button";
-

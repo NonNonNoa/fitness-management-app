@@ -148,30 +148,58 @@ AIによる食事画像解析。
 
 ### 目標管理
 
-#### `createGoal(userId, goalData)`
-新しい目標を作成。
+#### `createGoal(data)`
+新しい目標を作成。目標タイプによって使用するパラメータが異なる。
 
 **パラメータ**:
 ```typescript
 {
-  userId: string;
-  goalData: {
-    goalType: 'muscle_gain' | 'weight_loss' | 'weight_gain' | 'strength' | 'endurance';
-    targetValue: number;
-    startDate: string;
-    targetDate?: string;
-  };
+  goalType: 'muscle_gain' | 'weight_loss' | 'weight_gain' | 'strength';
+  startDate: string;      // YYYY-MM-DD
+  targetDate?: string;    // YYYY-MM-DD
+
+  // 減量・増量（weight_loss, weight_gain）の場合
+  currentWeightKg?: number;   // 現在体重（kg）
+  targetWeightKg?: number;    // 目標体重（kg）
+
+  // 筋力向上（strength）の場合
+  exerciseName?: string;      // 種目名（ベンチプレス等）
+  currentValue?: number;      // 現在重量（kg）
+  targetValue?: number;       // 目標重量（kg）
+
+  // 筋肉量アップ（muscle_gain）の場合（すべて任意）
+  currentMuscleMassKg?: number;  // 現在筋肉量（kg）
+  targetMuscleMassKg?: number;   // 目標筋肉量（kg）
+  currentArmCm?: number;         // 現在腕回り（cm）
+  targetArmCm?: number;          // 目標腕回り（cm）
+  currentChestCm?: number;       // 現在胸囲（cm）
+  targetChestCm?: number;        // 目標胸囲（cm）
+  currentWaistCm?: number;       // 現在ウエスト（cm）
+  targetWaistCm?: number;        // 目標ウエスト（cm）
 }
 ```
 
-#### `getGoals(userId, isActive?)`
+**戻り値**: `{ success: boolean; goalId?: string; error?: string }`
+
+**目標タイプ別の必須/推奨パラメータ**:
+- **weight_loss/weight_gain**: currentWeightKg, targetWeightKg（体重グラフに目標ライン表示）
+- **strength**: exerciseName, currentValue, targetValue
+- **muscle_gain**: 各サイズ項目は任意、必要なものだけ設定可能
+
+#### `getGoals(activeOnly?)`
 ユーザーの目標一覧を取得。
 
-#### `updateGoal(goalId, goalData)`
-目標を更新。
+#### `getGoal(goalId)`
+指定IDの目標を取得。
+
+#### `updateGoal(goalId, data)`
+目標を更新。パラメータはcreateGoalと同じ。
 
 #### `deleteGoal(goalId)`
 目標を削除。
+
+#### `toggleGoalActive(goalId)`
+目標のアクティブ状態を切り替え。
 
 ### 体組成管理
 

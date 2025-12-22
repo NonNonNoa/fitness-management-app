@@ -1,3 +1,7 @@
+/**
+ * @fileoverview AI機能に関するサーバーアクション
+ * 食事の画像分析、食事提案、トレーニングプラン生成、進捗予測などを提供する
+ */
 "use server";
 
 import {
@@ -12,6 +16,11 @@ import {
 } from "@/lib/ai";
 import { getSession } from "@/lib/auth";
 
+/**
+ * 認証を要求する内部ヘルパー関数
+ * @throws {Error} 未認証の場合
+ * @returns {Promise<User>} 認証済みユーザー情報
+ */
 async function requireAuth() {
   const session = await getSession();
   if (!session?.user) {
@@ -20,6 +29,17 @@ async function requireAuth() {
   return session.user;
 }
 
+/**
+ * 食事画像を分析してカロリーと栄養素を推定する
+ * @param {string} imageBase64 - Base64エンコードされた画像データ
+ * @returns {Promise<{success: boolean, data?: CalorieAnalysis, error?: string}>} 分析結果
+ * @description AIを使用して画像から食品を識別し、推定カロリーと栄養素を返す
+ * @example
+ * const result = await analyzeFood(base64ImageData);
+ * if (result.success) {
+ *   console.log(result.data.totalCalories);
+ * }
+ */
 export async function analyzeFood(imageBase64: string): Promise<{
   success: boolean;
   data?: CalorieAnalysis;
@@ -38,6 +58,15 @@ export async function analyzeFood(imageBase64: string): Promise<{
   }
 }
 
+/**
+ * 目標に基づいた食事提案を取得する
+ * @param {"weight_loss" | "weight_gain" | "muscle_gain" | "maintain"} goalType - 目標タイプ
+ * @param {number} currentCalories - 現在の摂取カロリー
+ * @param {number} targetCalories - 目標カロリー
+ * @param {string} [preferences] - 食事の好み（オプション）
+ * @returns {Promise<{success: boolean, data?: MealSuggestion, error?: string}>} 食事提案
+ * @description AIが目標と現在の状況に基づいて最適な食事を提案する
+ */
 export async function getMealSuggestions(
   goalType: "weight_loss" | "weight_gain" | "muscle_gain" | "maintain",
   currentCalories: number,
@@ -66,6 +95,16 @@ export async function getMealSuggestions(
   }
 }
 
+/**
+ * カスタマイズされたトレーニングプランを生成する
+ * @param {"muscle_gain" | "strength" | "weight_loss" | "endurance"} goalType - トレーニング目標
+ * @param {"beginner" | "intermediate" | "advanced"} level - トレーニングレベル
+ * @param {number} daysPerWeek - 週あたりのトレーニング日数
+ * @param {string[]} equipment - 利用可能な器具
+ * @param {string[]} [focusAreas] - 重点的に鍛えたい部位（オプション）
+ * @returns {Promise<{success: boolean, data?: WorkoutPlan, error?: string}>} トレーニングプラン
+ * @description AIがユーザーの目標と条件に基づいてパーソナライズされたプランを生成
+ */
 export async function getWorkoutPlan(
   goalType: "muscle_gain" | "strength" | "weight_loss" | "endurance",
   level: "beginner" | "intermediate" | "advanced",
@@ -96,6 +135,15 @@ export async function getWorkoutPlan(
   }
 }
 
+/**
+ * 過去のデータに基づいて進捗を予測する
+ * @param {string} goalType - 目標タイプ
+ * @param {number} currentValue - 現在値
+ * @param {number} targetValue - 目標値
+ * @param {Array<{date: string, value: number}>} historicalData - 過去の記録データ
+ * @returns {Promise<{success: boolean, data?: ProgressPrediction, error?: string}>} 進捗予測
+ * @description AIが過去のトレンドを分析し、目標達成までの予測を提供する
+ */
 export async function getProgressPrediction(
   goalType: string,
   currentValue: number,
@@ -123,5 +171,3 @@ export async function getProgressPrediction(
     };
   }
 }
-
-

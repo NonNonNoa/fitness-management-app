@@ -1,3 +1,7 @@
+/**
+ * @fileoverview モバイル用ボトムナビゲーションコンポーネント
+ * アプリの主要ページへのナビゲーションを提供する固定フッター
+ */
 "use client";
 
 import Link from "next/link";
@@ -6,6 +10,9 @@ import { motion } from "framer-motion";
 import { Home, Utensils, Dumbbell, Target, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/**
+ * ナビゲーションアイテムの定義
+ */
 const navItems = [
   { href: "/dashboard", icon: Home, label: "ホーム" },
   { href: "/meals", icon: Utensils, label: "食事" },
@@ -14,6 +21,16 @@ const navItems = [
   { href: "/profile", icon: User, label: "設定" },
 ];
 
+/**
+ * モバイル用ボトムナビゲーションコンポーネント
+ * 画面下部に固定表示され、主要ページへのナビゲーションを提供
+ * md以上の画面サイズでは非表示になる
+ * @returns {JSX.Element} ボトムナビゲーション要素
+ * @description
+ * - 現在のページに応じてアクティブ状態を表示
+ * - アニメーション付きのインジケーターで現在位置を示す
+ * - safe-area-bottomでノッチ付きデバイスに対応
+ */
 export function BottomNav() {
   const pathname = usePathname();
 
@@ -58,5 +75,3 @@ export function BottomNav() {
     </motion.nav>
   );
 }
-
-

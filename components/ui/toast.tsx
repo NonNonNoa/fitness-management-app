@@ -1,3 +1,7 @@
+/**
+ * @fileoverview トースト通知コンポーネント
+ * 成功、エラー、警告、情報などのトースト通知を提供
+ */
 "use client";
 
 import { createContext, useContext, useState, useCallback } from "react";
@@ -5,26 +9,60 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/**
+ * トーストのタイプ
+ */
 type ToastType = "success" | "error" | "warning" | "info";
 
+/**
+ * トーストオブジェクトの型
+ */
 interface Toast {
+  /** トーストID */
   id: string;
+  /** トーストタイプ */
   type: ToastType;
+  /** 表示メッセージ */
   message: string;
+  /** 表示時間（ミリ秒） */
   duration?: number;
 }
 
+/**
+ * トーストコンテキストの型
+ */
 interface ToastContextType {
+  /** 現在表示中のトースト一覧 */
   toasts: Toast[];
+  /** トーストを追加する関数 */
   addToast: (type: ToastType, message: string, duration?: number) => void;
+  /** トーストを削除する関数 */
   removeToast: (id: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+/**
+ * トーストプロバイダーコンポーネント
+ * アプリケーションのルートでラップして使用する
+ * @param {Object} props - プロパティ
+ * @param {React.ReactNode} props.children - 子要素
+ * @returns {JSX.Element} プロバイダー要素
+ * @example
+ * // layout.tsx
+ * <ToastProvider>
+ *   {children}
+ * </ToastProvider>
+ */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  /**
+   * トーストを追加する
+   * @param {ToastType} type - トーストタイプ
+   * @param {string} message - 表示メッセージ
+   * @param {number} duration - 表示時間（デフォルト5000ms）
+   */
   const addToast = useCallback((type: ToastType, message: string, duration = 5000) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, type, message, duration }]);
@@ -36,6 +74,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  /**
+   * トーストを削除する
+   * @param {string} id - 削除するトーストのID
+   */
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
@@ -48,6 +90,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * トースト機能を使用するためのフック
+ * @returns {ToastContextType} トーストコンテキスト
+ * @throws {Error} ToastProviderの外で使用した場合
+ * @example
+ * const { addToast } = useToast();
+ * addToast("success", "保存しました！");
+ */
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
@@ -56,6 +106,9 @@ export function useToast() {
   return context;
 }
 
+/**
+ * トースト表示コンテナ（内部コンポーネント）
+ */
 function ToastContainer({
   toasts,
   removeToast,
@@ -74,6 +127,9 @@ function ToastContainer({
   );
 }
 
+/**
+ * 個別のトーストアイテム（内部コンポーネント）
+ */
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   const icons = {
     success: <CheckCircle className="w-5 h-5" />,
@@ -110,5 +166,3 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
     </motion.div>
   );
 }
-
-

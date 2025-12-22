@@ -12,28 +12,21 @@ interface AuthError {
 }
 
 export default function LoginPage() {
-  const [callbackUrl, setCallbackUrl] = useState("/dashboard");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // クライアントサイドでのみURLパラメータを取得
-  useEffect(() => {
+  // クライアントサイドでのみURLパラメータを取得（初期値として設定）
+  const [callbackUrl] = useState(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      const urlParam = params.get("callbackUrl");
-      if (urlParam) {
-        setCallbackUrl(urlParam);
-      }
+      return params.get("callbackUrl") || "/dashboard";
     }
-  }, []);
+    return "/dashboard";
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      console.log("Starting Google sign in...");
-      console.log("Callback URL:", callbackUrl);
       
       console.log("Starting Google sign in...");
       console.log("Callback URL:", callbackUrl);

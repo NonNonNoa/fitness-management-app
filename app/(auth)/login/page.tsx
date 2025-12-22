@@ -37,6 +37,7 @@ export default function LoginPage() {
       });
       
       console.log("Sign in result:", result);
+      console.log("Result data:", result?.data);
       
       // エラーがある場合
       if (result?.error) {
@@ -55,8 +56,30 @@ export default function LoginPage() {
         console.error("Auth error details:", result.error);
         setError(`ログインエラー: ${errorMessage}`);
         setIsLoading(false);
+        return;
       }
-      // リダイレクトが発生しない場合（設定の問題）
+      
+      // 成功した場合、リダイレクトURLを確認
+      if (result?.data) {
+        // result.dataにリダイレクトURLが含まれている場合
+        const redirectUrl = (result.data as any)?.url || (result.data as any)?.redirectUrl;
+        if (redirectUrl) {
+          console.log("Redirecting to:", redirectUrl);
+          window.location.href = redirectUrl;
+          return;
+        }
+        
+        // セッションが作成された場合、callbackURLにリダイレクト
+        if ((result.data as any)?.session || (result.data as any)?.user) {
+          console.log("Session created, redirecting to:", callbackUrl);
+          window.location.href = callbackUrl;
+          return;
+        }
+      }
+      
+      // リダイレクトが発生しない場合、手動でリダイレクト
+      console.log("No automatic redirect, manually redirecting to:", callbackUrl);
+      window.location.href = callbackUrl;
     } catch (err) {
       console.error("Sign in error:", err);
       const errorMessage = err instanceof Error ? err.message : "不明なエラー";

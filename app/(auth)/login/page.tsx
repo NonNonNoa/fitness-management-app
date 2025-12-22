@@ -78,8 +78,11 @@ export default function LoginPage() {
           const redirectUrl = data.url || data.redirectUrl;
           if (redirectUrl && typeof redirectUrl === "string") {
             console.log("Redirecting to OAuth provider:", redirectUrl);
-            // 即座にリダイレクトを実行
-            window.location.href = redirectUrl;
+            // 状態更新を避けて、即座にリダイレクトを実行
+            // Reactの再レンダリングを待たずにリダイレクト
+            setTimeout(() => {
+              window.location.href = redirectUrl;
+            }, 100);
             return;
           }
         }
@@ -88,22 +91,28 @@ export default function LoginPage() {
         const redirectUrl = data.url || data.redirectUrl;
         if (redirectUrl && typeof redirectUrl === "string") {
           console.log("Redirecting to:", redirectUrl);
-          // 即座にリダイレクトを実行
-          window.location.href = redirectUrl;
+          // 状態更新を避けて、即座にリダイレクトを実行
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 100);
           return;
         }
         
         // セッションが作成された場合、callbackURLにリダイレクト
         if (data.session || data.user) {
           console.log("Session created, redirecting to:", callbackUrl);
-          window.location.href = callbackUrl;
+          setTimeout(() => {
+            window.location.href = callbackUrl;
+          }, 100);
           return;
         }
       }
       
       // リダイレクトが発生しない場合、手動でリダイレクト
       console.log("No automatic redirect, manually redirecting to:", callbackUrl);
-      window.location.href = callbackUrl;
+      setTimeout(() => {
+        window.location.href = callbackUrl;
+      }, 100);
     } catch (err) {
       console.error("Sign in error:", err);
       const errorMessage = err instanceof Error ? err.message : "不明なエラー";

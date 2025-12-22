@@ -61,7 +61,13 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-zinc-950 relative">
+      {/* アニメーション背景オーバーレイ */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 bg-zinc-900/95 backdrop-blur-lg border-r border-zinc-800 flex-col">
         {/* Logo */}
@@ -210,15 +216,18 @@ export default function DashboardLayout({
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="md:ml-64 pt-14 md:pt-0 pb-20 md:pb-0">
+      <main className="md:ml-64 pt-14 md:pt-0 pb-20 md:pb-0 relative z-10">
         <div className="max-w-6xl mx-auto p-4 md:p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.98 }}
+              transition={{ 
+                duration: 0.3,
+                ease: [0.4, 0, 0.2, 1]
+              }}
             >
               {children}
             </motion.div>

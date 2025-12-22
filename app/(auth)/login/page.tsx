@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,14 @@ import { signIn } from "@/lib/auth/client";
 interface AuthError {
   message?: string;
   code?: string;
+}
+
+interface SignInData {
+  url?: string;
+  redirectUrl?: string;
+  session?: unknown;
+  user?: unknown;
+  [key: string]: unknown;
 }
 
 export default function LoginPage() {
@@ -61,16 +69,17 @@ export default function LoginPage() {
       
       // 成功した場合、リダイレクトURLを確認
       if (result?.data) {
+        const data = result.data as SignInData;
         // result.dataにリダイレクトURLが含まれている場合
-        const redirectUrl = (result.data as any)?.url || (result.data as any)?.redirectUrl;
-        if (redirectUrl) {
+        const redirectUrl = data.url || data.redirectUrl;
+        if (redirectUrl && typeof redirectUrl === "string") {
           console.log("Redirecting to:", redirectUrl);
           window.location.href = redirectUrl;
           return;
         }
         
         // セッションが作成された場合、callbackURLにリダイレクト
-        if ((result.data as any)?.session || (result.data as any)?.user) {
+        if (data.session || data.user) {
           console.log("Session created, redirecting to:", callbackUrl);
           window.location.href = callbackUrl;
           return;

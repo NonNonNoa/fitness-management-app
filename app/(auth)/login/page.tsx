@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +13,7 @@ interface AuthError {
 }
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,11 +22,15 @@ export default function LoginPage() {
       setIsLoading(true);
       setError(null);
       
+      // URLパラメータからcallbackUrlを取得（なければ/dashboard）
+      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      
       console.log("Starting Google sign in...");
+      console.log("Callback URL:", callbackUrl);
       
       const result = await signIn.social({
         provider: "google",
-        callbackURL: "/dashboard",
+        callbackURL: callbackUrl,
       });
       
       console.log("Sign in result:", result);

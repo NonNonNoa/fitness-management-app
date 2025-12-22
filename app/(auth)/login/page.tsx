@@ -14,6 +14,7 @@ interface AuthError {
 interface SignInData {
   url?: string;
   redirectUrl?: string;
+  redirect?: boolean;
   session?: unknown;
   user?: unknown;
   [key: string]: unknown;
@@ -70,25 +71,38 @@ export default function LoginPage() {
       // 成功した場合、リダイレクトURLを確認
       if (result?.data) {
         const data = result.data as SignInData;
+        
+        // redirect: true が含まれている場合、自動リダイレクトが期待される
+        // しかし、リダイレクトが発生しない場合は手動でリダイレクト
+        if (data.redirect && (data.url || data.redirectUrl)) {
+          const redirectUrl = data.url || data.redirectUrl;
+          if (redirectUrl && typeof redirectUrl === "string") {
+            console.log("Redirecting to OAuth provider:", redirectUrl);
+            // window.location.replace()を使用して、ブラウザの履歴に残さない
+            window.location.replace(redirectUrl);
+            return;
+          }
+        }
+        
         // result.dataにリダイレクトURLが含まれている場合
         const redirectUrl = data.url || data.redirectUrl;
         if (redirectUrl && typeof redirectUrl === "string") {
           console.log("Redirecting to:", redirectUrl);
-          window.location.href = redirectUrl;
+          window.location.replace(redirectUrl);
           return;
         }
         
         // セッションが作成された場合、callbackURLにリダイレクト
         if (data.session || data.user) {
           console.log("Session created, redirecting to:", callbackUrl);
-          window.location.href = callbackUrl;
+          window.location.replace(callbackUrl);
           return;
         }
       }
       
       // リダイレクトが発生しない場合、手動でリダイレクト
       console.log("No automatic redirect, manually redirecting to:", callbackUrl);
-      window.location.href = callbackUrl;
+      window.location.replace(callbackUrl);
     } catch (err) {
       console.error("Sign in error:", err);
       const errorMessage = err instanceof Error ? err.message : "不明なエラー";

@@ -21,15 +21,21 @@ export function AnimatedCard({
 }: AnimatedCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay, ease: "easeOut" }}
-      whileHover={hoverable ? { scale: 1.02, y: -2 } : undefined}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, delay, ease: [0.4, 0, 0.2, 1] }}
+      whileHover={hoverable ? { 
+        scale: 1.02, 
+        y: -4,
+        transition: { duration: 0.2 }
+      } : undefined}
       whileTap={hoverable ? { scale: 0.98 } : undefined}
       className={cn(
-        "bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5",
-        "shadow-lg shadow-black/20",
-        hoverable && "cursor-pointer transition-colors hover:border-zinc-700",
+        "bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-5",
+        "shadow-xl shadow-black/30",
+        "relative overflow-hidden",
+        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-orange-500/0 before:to-purple-500/0 before:opacity-0 before:transition-opacity before:duration-300",
+        hoverable && "cursor-pointer transition-all hover:border-orange-500/30 hover:shadow-orange-500/10 hover:shadow-2xl hover:before:opacity-100",
         className
       )}
       {...props}
@@ -70,10 +76,21 @@ export function StatsCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, delay }}
-      className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5"
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.4, delay, ease: [0.4, 0, 0.2, 1] }}
+      whileHover={{ 
+        scale: 1.03,
+        y: -4,
+        transition: { duration: 0.2 }
+      }}
+      className="bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-5 relative overflow-hidden group cursor-pointer
+                 shadow-xl shadow-black/30
+                 before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
+                 hover:border-orange-500/30 hover:shadow-orange-500/10 hover:shadow-2xl hover:before:opacity-100"
+      style={{
+        background: `linear-gradient(135deg, rgba(39, 39, 42, 0.9) 0%, rgba(24, 24, 27, 0.9) 100%)`,
+      }}
     >
       <div className="flex items-start justify-between">
         <div>
@@ -91,9 +108,12 @@ export function StatsCard({
           )}
         </div>
         {icon && (
-          <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]}`}>
+          <motion.div 
+            className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]} shadow-lg group-hover:scale-110 transition-transform duration-300`}
+            whileHover={{ rotate: [0, -10, 10, -10, 0], transition: { duration: 0.5 } }}
+          >
             {icon}
-          </div>
+          </motion.div>
         )}
       </div>
     </motion.div>

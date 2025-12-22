@@ -199,18 +199,32 @@ export default function DashboardPage() {
   )?.targetWeightKg;
 
   return (
-    <div className="space-y-6 pb-20 md:pb-6">
+    <div className="space-y-6 pb-20 md:pb-6 relative z-10">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
+        <div className="relative">
+          <motion.h1 
+            className="text-2xl md:text-3xl font-bold text-white bg-gradient-to-r from-white via-orange-100 to-white bg-clip-text text-transparent"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
             こんにちは、{session?.user?.name?.split(" ")[0] || "ユーザー"}さん！
-          </h1>
-          <p className="text-zinc-400 mt-1">{today}</p>
+          </motion.h1>
+          <motion.p 
+            className="text-zinc-400 mt-1 flex items-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+            {today}
+          </motion.p>
         </div>
         <div className="flex gap-2">
           <Link href="/meals/new">
@@ -336,19 +350,25 @@ export default function DashboardPage() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8 + index * 0.1 }}
-                  className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-xl"
+                  whileHover={{ scale: 1.02, x: 4 }}
+                  className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-xl
+                             hover:bg-zinc-800/80 border border-transparent hover:border-zinc-700/50
+                             transition-all duration-300 cursor-pointer group"
                 >
-                  <div className={`p-2 rounded-lg ${
-                    activity.type === "meal" 
-                      ? "bg-green-500/20 text-green-400" 
-                      : "bg-orange-500/20 text-orange-400"
-                  }`}>
+                  <motion.div 
+                    className={`p-2 rounded-lg transition-all duration-300 ${
+                      activity.type === "meal" 
+                        ? "bg-green-500/20 text-green-400 group-hover:bg-green-500/30" 
+                        : "bg-orange-500/20 text-orange-400 group-hover:bg-orange-500/30"
+                    }`}
+                    whileHover={{ rotate: [0, -5, 5, -5, 0], transition: { duration: 0.5 } }}
+                  >
                     {activity.type === "meal" ? (
                       <Utensils className="w-4 h-4" />
                     ) : (
                       <Dumbbell className="w-4 h-4" />
                     )}
-                  </div>
+                  </motion.div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white truncate">{activity.title}</p>
                     <p className="text-xs text-zinc-500">{activity.date}</p>
@@ -368,30 +388,83 @@ export default function DashboardPage() {
 
       {/* AI Features Banner */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="relative overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-2xl p-6"
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ delay: 0.8, duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+        whileHover={{ scale: 1.01, y: -2 }}
+        className="relative overflow-hidden bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-purple-600/20 border border-purple-500/30 rounded-2xl p-6
+                   backdrop-blur-md shadow-2xl shadow-purple-500/10
+                   before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-500/10 before:to-pink-500/10 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500"
       >
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-5 h-5 text-purple-400" />
+          <motion.div 
+            className="flex items-center gap-2 mb-2"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.9 }}
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Zap className="w-5 h-5 text-purple-400" />
+            </motion.div>
             <span className="text-sm font-medium text-purple-300">AI機能</span>
-          </div>
-          <h3 className="text-xl font-bold text-white mb-2">
+          </motion.div>
+          <motion.h3 
+            className="text-xl font-bold text-white mb-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+          >
             AIがあなたのトレーニングをサポート
-          </h3>
-          <p className="text-zinc-400 text-sm mb-4">
+          </motion.h3>
+          <motion.p 
+            className="text-zinc-400 text-sm mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1 }}
+          >
             写真からカロリー計算、食事提案、トレーニングプラン生成など
-          </p>
-          <Link href="/ai">
-            <AnimatedButton variant="secondary" size="sm" icon={<ChevronRight className="w-4 h-4" />}>
-              AI機能を使う
-            </AnimatedButton>
-          </Link>
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.2 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/ai">
+              <AnimatedButton variant="secondary" size="sm" icon={<ChevronRight className="w-4 h-4" />}>
+                AI機能を使う
+              </AnimatedButton>
+            </Link>
+          </motion.div>
         </div>
-        <div className="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute -right-5 -bottom-10 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl" />
+        <motion.div 
+          className="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3]
+          }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute -right-5 -bottom-10 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.5, 0.3]
+          }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        />
+        <motion.div 
+          className="absolute top-1/2 left-1/4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl"
+          animate={{ 
+            x: [0, 20, 0],
+            y: [0, -20, 0]
+          }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
       </motion.div>
     </div>
   );
@@ -481,13 +554,24 @@ function GoalCard({
       transition={{ delay: 0.35 + index * 0.1 }}
     >
       <Link href={`/goals/${goal.id}`}>
-        <div className={`p-4 bg-zinc-900/80 border ${getBorderColor()} rounded-xl hover:bg-zinc-800/80 transition-colors`}>
+        <motion.div 
+          className={`p-4 bg-zinc-900/90 backdrop-blur-md border ${getBorderColor()} rounded-xl relative overflow-hidden group
+                     shadow-xl shadow-black/20
+                     before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
+                     hover:bg-zinc-800/90 hover:border-opacity-100 hover:shadow-2xl hover:shadow-orange-500/10 hover:before:opacity-100
+                     transition-all duration-300`}
+          whileHover={{ scale: 1.02, y: -4 }}
+          whileTap={{ scale: 0.98 }}
+        >
           {/* 目標タイプヘッダー */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className={`p-2.5 rounded-xl bg-gradient-to-br ${getGoalColor()} text-white shadow-lg`}>
+              <motion.div 
+              className={`p-2.5 rounded-xl bg-gradient-to-br ${getGoalColor()} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
+              whileHover={{ rotate: [0, -10, 10, -10, 0], transition: { duration: 0.5 } }}
+            >
                 {getGoalIcon()}
-              </div>
+              </motion.div>
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-1.5">
                   <span>{getGoalEmoji()}</span>
@@ -665,7 +749,7 @@ function GoalCard({
               )}
             </div>
           )}
-        </div>
+        </motion.div>
       </Link>
     </motion.div>
   );
@@ -692,14 +776,28 @@ function QuickAction({
   return (
     <Link href={href}>
       <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="flex flex-col items-center gap-2 p-4 bg-zinc-800/50 rounded-xl hover:bg-zinc-800 transition-colors"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ 
+          scale: 1.05, 
+          y: -4,
+          transition: { duration: 0.2 }
+        }}
+        whileTap={{ scale: 0.95 }}
+        className="flex flex-col items-center gap-2 p-4 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800/50 rounded-xl 
+                   hover:bg-zinc-800/80 hover:border-orange-500/30 
+                   transition-all duration-300 relative overflow-hidden group
+                   shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-orange-500/10
+                   before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
+                   hover:before:opacity-100"
       >
-        <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]}`}>
+        <motion.div 
+          className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]} shadow-lg group-hover:scale-110 transition-transform duration-300`}
+          whileHover={{ rotate: [0, -10, 10, -10, 0], transition: { duration: 0.5 } }}
+        >
           <div className="text-white">{icon}</div>
-        </div>
-        <span className="text-sm text-zinc-300">{label}</span>
+        </motion.div>
+        <span className="text-sm text-zinc-300 font-medium group-hover:text-white transition-colors">{label}</span>
       </motion.div>
     </Link>
   );

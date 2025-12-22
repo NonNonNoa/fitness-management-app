@@ -47,16 +47,37 @@ interface ChartContainerProps {
 export function ChartContainer({ title, children, delay = 0 }: ChartContainerProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
-      className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5"
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, delay, ease: [0.4, 0, 0.2, 1] }}
+      whileHover={{ scale: 1.01, y: -2 }}
+      className="bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-5
+                 shadow-xl shadow-black/30
+                 relative overflow-hidden group
+                 before:absolute before:inset-0 before:bg-gradient-to-br before:from-orange-500/0 before:to-red-500/0 before:opacity-0 before:transition-opacity before:duration-300
+                 hover:border-orange-500/30 hover:shadow-orange-500/10 hover:shadow-2xl hover:before:opacity-100
+                 transition-all duration-300"
     >
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-        <span className="w-1 h-5 bg-gradient-to-b from-orange-500 to-red-600 rounded-full" />
+      <motion.h3 
+        className="text-lg font-semibold text-white mb-4 flex items-center gap-2"
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: delay + 0.1 }}
+      >
+        <motion.span 
+          className="w-1 h-5 bg-gradient-to-b from-orange-500 to-red-600 rounded-full"
+          animate={{ height: [20, 24, 20] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
         {title}
-      </h3>
-      {children}
+      </motion.h3>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: delay + 0.2 }}
+      >
+        {children}
+      </motion.div>
     </motion.div>
   );
 }

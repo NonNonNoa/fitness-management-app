@@ -1,10 +1,41 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { getMeals } from "@/lib/actions/meals";
 import { getMealTypeLabel } from "@/lib/utils/meal-helpers";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 
-export default async function MealsPage() {
-  const meals = await getMeals();
+export default function MealsPage() {
+  const [meals, setMeals] = useState<Awaited<ReturnType<typeof getMeals>>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMeals() {
+      try {
+        const data = await getMeals();
+        setMeals(data);
+      } catch (error) {
+        console.error("Failed to fetch meals:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMeals();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full"
+        />
+      </div>
+    );
+  }
 
   // 日付ごとにグループ化
   const mealsByDate = meals.reduce((acc, meal) => {
@@ -21,21 +52,48 @@ export default async function MealsPage() {
   return (
     <div className="space-y-6">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between">
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div>
-          <h1 className="text-2xl font-bold text-white">食事記録</h1>
-          <p className="text-zinc-400 mt-1">日々の食事を記録・管理</p>
+          <motion.h1 
+            className="text-2xl font-bold text-white bg-gradient-to-r from-white via-orange-100 to-white bg-clip-text text-transparent"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            食事記録
+          </motion.h1>
+          <motion.p 
+            className="text-zinc-400 mt-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            日々の食事を記録・管理
+          </motion.p>
         </div>
-        <Link
-          href="/meals/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium hover:from-orange-600 hover:to-red-700 transition-all"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
+          <Link
+            href="/meals/new"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium hover:from-orange-600 hover:to-red-700 transition-all shadow-lg shadow-orange-500/20"
+          >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          食事を記録
-        </Link>
-      </div>
+            食事を記録
+          </Link>
+        </motion.div>
+      </motion.div>
 
       {/* 食事一覧 */}
       {sortedDates.length === 0 ? (
@@ -76,7 +134,12 @@ export default async function MealsPage() {
             });
 
             return (
-              <div key={date}>
+              <motion.div 
+                key={date}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + sortedDates.indexOf(date) * 0.1 }}
+              >
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-lg font-semibold text-white">{formattedDate}</h2>
                   <span className="text-sm text-zinc-400">
@@ -88,7 +151,7 @@ export default async function MealsPage() {
                     <MealCard key={meal.id} meal={meal} />
                   ))}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -109,14 +172,29 @@ function MealCard({ meal }: { meal: Awaited<ReturnType<typeof getMeals>>[number]
 
   return (
     <Link href={`/meals/${meal.id}`}>
-      <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-all group">
+      <motion.div 
+        className="p-4 bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50 rounded-xl 
+                   hover:border-orange-500/30 hover:bg-zinc-800/90 
+                   transition-all group relative overflow-hidden
+                   shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-orange-500/10
+                   before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
+                   hover:before:opacity-100"
+        whileHover={{ scale: 1.02, y: -4 }}
+        whileTap={{ scale: 0.98 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center`}>
+            <motion.div 
+              className={`w-10 h-10 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
+              whileHover={{ rotate: [0, -10, 10, -10, 0], transition: { duration: 0.5 } }}
+            >
               <span className="text-white text-sm font-bold">
                 {getMealTypeLabel(meal.mealType || "snack").charAt(0)}
               </span>
-            </div>
+            </motion.div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-medium text-white group-hover:text-orange-400 transition-colors">
@@ -151,7 +229,7 @@ function MealCard({ meal }: { meal: Awaited<ReturnType<typeof getMeals>>[number]
             <span className="text-zinc-300">{meal.totalFats?.toFixed(1) || 0}g</span>
           </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 }

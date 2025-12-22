@@ -19,7 +19,11 @@ export function middleware(request: NextRequest) {
 
   // セッショントークンの確認
   // BetterAuthのセッションクッキー名を確認（デフォルトは "better-auth.session_token"）
-  const sessionToken = request.cookies.get("better-auth.session_token");
+  // 複数のクッキー名をチェック（BetterAuthのバージョンによって異なる可能性がある）
+  const sessionToken = 
+    request.cookies.get("better-auth.session_token") ||
+    request.cookies.get("better-auth.session-token") ||
+    request.cookies.get("better_auth_session_token");
 
   // 保護されたルートへのアクセス
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -28,24 +32,6 @@ export function middleware(request: NextRequest) {
 
   // 認証が必要なルートにアクセスしようとしているが、セッションがない場合
   if (isProtectedRoute && !sessionToken) {
-    // OAuthコールバック直後のリクエストを一時的に許可
-    // BetterAuthのコールバックは/api/auth/callback/googleで処理され、
-    // その直後のリダイレクト時はセッションクッキーが設定される前の可能性がある
-    // refererヘッダーまたはURLパラメータでOAuthコールバック後のリクエストを検出
-    const referer = request.headers.get("referer");
-    const isOAuthCallback = 
-      referer?.includes("/api/auth/callback") ||
-      request.url.includes("callback") ||
-      request.headers.get("x-vercel-id"); // VercelのリクエストIDで判断
-    
-    // OAuthコールバック後のリクエストの場合、セッションクッキーの設定を待つため一時的に許可
-    // ただし、これはセキュリティリスクがあるため、短時間のみ許可
-    if (isOAuthCallback && pathname === "/dashboard") {
-      // セッションクッキーが設定されるまで少し待つ（実際にはクライアント側で処理）
-      // ここでは一時的に許可するが、実際のセッション確認はページ側で行う
-      return NextResponse.next();
-    }
-
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);

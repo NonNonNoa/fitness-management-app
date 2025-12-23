@@ -23,10 +23,12 @@ export function middleware(request: NextRequest) {
   );
 
   // BetterAuthのセッションクッキーを確認
-  // BetterAuthはデフォルトで "better-auth.session_token" という名前のクッキーを使用
+  // BetterAuthはHTTPS環境では "__Secure-better-auth.session_token" という名前のクッキーを使用
   // 複数の可能性のあるクッキー名をチェック
   const sessionToken = 
+    request.cookies.get("__Secure-better-auth.session_token")?.value ||
     request.cookies.get("better-auth.session_token")?.value ||
+    request.cookies.get("__Secure-better-auth.session-token")?.value ||
     request.cookies.get("better-auth.session-token")?.value ||
     request.cookies.get("better_auth_session_token")?.value;
 

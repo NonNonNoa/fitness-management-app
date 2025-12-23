@@ -10,7 +10,6 @@ import {
   Menu, X 
 } from "lucide-react";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { MusicPlayer } from "@/components/ui/music-player";
 import { useState } from "react";
 
 const sidebarItems = [
@@ -238,9 +237,6 @@ export default function DashboardLayout({
 
       {/* Bottom Nav (Mobile) */}
       <BottomNav />
-
-      {/* Music Player */}
-      <MusicPlayer />
     </div>
   );
 }

@@ -45,13 +45,22 @@ export default function FoodScanPage() {
       setAnalyzing(true);
       try {
         const response = await analyzeFood(base64);
+        console.log("=== AI食事画像分析レスポンス ===");
+        console.log("Success:", response.success);
         if (response.success && response.data) {
+          console.log("分析データ:", JSON.stringify(response.data, null, 2));
           setResult(response.data);
         } else {
+          console.error("エラー:", response.error);
           setError(response.error || "分析に失敗しました");
         }
       } catch (err) {
-        setError("分析中にエラーが発生しました");
+        console.error("Error in food analysis:", err);
+        setError(
+          err instanceof Error 
+            ? err.message 
+            : "分析中にエラーが発生しました。コンソールを確認してください。"
+        );
       } finally {
         setAnalyzing(false);
       }

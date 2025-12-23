@@ -34,19 +34,22 @@ export function AnimatedCard({
         "bg-black/60 backdrop-blur-md border border-purple-500/30 rounded-2xl p-5",
         "shadow-xl shadow-black/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]",
         "relative overflow-hidden",
-        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-500/0 before:to-pink-500/0 before:opacity-0 before:transition-opacity before:duration-300",
+        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-500/0 before:to-pink-500/0 before:opacity-0 before:transition-opacity before:duration-300 before:pointer-events-none",
         hoverable && "cursor-pointer transition-all hover:border-purple-400/50 hover:shadow-purple-500/30 hover:shadow-2xl hover:before:opacity-100",
+        !hoverable && "before:pointer-events-none",
         className
       )}
       {...props}
     >
-      {title && (
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span className="w-1 h-5 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
-          {title}
-        </h3>
-      )}
-      {children}
+      <div className="relative z-10">
+        {title && (
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span className="w-1 h-5 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
+            {title}
+          </h3>
+        )}
+        {children}
+      </div>
     </motion.div>
   );
 }

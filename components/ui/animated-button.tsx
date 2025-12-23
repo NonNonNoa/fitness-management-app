@@ -55,8 +55,10 @@ export function AnimatedButton({
         fullWidth && "w-full",
         (disabled || loading) && "opacity-50 cursor-not-allowed",
         "font-bold",
+        "relative z-10", // z-indexを追加してボタンがクリック可能に
         className
       )}
+      style={{ pointerEvents: disabled || loading ? "none" : "auto", zIndex: 20, ...props.style }}
       {...props}
     >
       {loading ? (

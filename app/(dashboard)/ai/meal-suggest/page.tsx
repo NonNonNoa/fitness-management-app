@@ -45,13 +45,22 @@ export default function MealSuggestPage() {
         targetCalories,
         preferences || undefined
       );
+      console.log("=== AI食事提案レスポンス ===");
+      console.log("Success:", response.success);
       if (response.success && response.data) {
+        console.log("提案データ:", JSON.stringify(response.data, null, 2));
         setResult(response.data);
       } else {
+        console.error("エラー:", response.error);
         setError(response.error || "提案の取得に失敗しました");
       }
     } catch (err) {
-      setError("エラーが発生しました");
+      console.error("Error in meal suggestions:", err);
+      setError(
+        err instanceof Error 
+          ? err.message 
+          : "エラーが発生しました。コンソールを確認してください。"
+      );
     } finally {
       setLoading(false);
     }

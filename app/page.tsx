@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MusicPlayer } from "@/components/ui/music-player";
 
 export default function Home() {
   return (
@@ -196,9 +195,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-      {/* Music Player */}
-      <MusicPlayer />
     </div>
   );
 }

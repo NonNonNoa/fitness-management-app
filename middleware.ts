@@ -11,9 +11,6 @@ const protectedRoutes = [
   "/settings",
 ];
 
-// 公開ルート（認証不要なパス）
-const publicRoutes = ["/", "/login", "/signup"];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 

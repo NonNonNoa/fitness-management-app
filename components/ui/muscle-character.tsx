@@ -170,7 +170,9 @@ export function MuscleCharacter() {
                 const baseY = 80;
                 const x = baseX + Math.sin((angle * Math.PI) / 180) * 55;
                 const y = baseY - Math.abs(Math.cos((angle * Math.PI) / 180)) * 45;
-                const height = 50 + Math.random() * 20;
+                // 固定の高さ値を使用（各髪の毛に異なる高さを与える）
+                const heightVariations = [50, 55, 60, 52, 58, 54, 56, 53, 57, 59];
+                const height = heightVariations[i] || 55;
                 return (
                   <motion.g
                     key={i}

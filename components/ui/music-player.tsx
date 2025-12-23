@@ -22,7 +22,30 @@ export function MusicPlayer({
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.3); // デフォルト音量30%
+  const [hasError, setHasError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // 音楽ファイルの読み込みエラーを検出
+    const handleError = () => {
+      setHasError(true);
+    };
+
+    const handleCanPlay = () => {
+      setHasError(false);
+    };
+
+    audio.addEventListener("error", handleError);
+    audio.addEventListener("canplay", handleCanPlay);
+
+    return () => {
+      audio.removeEventListener("error", handleError);
+      audio.removeEventListener("canplay", handleCanPlay);
+    };
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -116,7 +139,7 @@ export function MusicPlayer({
           </div>
         </div>
 
-        {!audioRef.current?.src && (
+        {hasError && (
           <p className="text-xs text-purple-300/70 mt-2 text-center">
             音楽ファイルを public/music/phonk.mp3 に配置してください
           </p>

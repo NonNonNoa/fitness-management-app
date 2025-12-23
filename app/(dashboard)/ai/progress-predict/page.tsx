@@ -94,12 +94,17 @@ export default function ProgressPredictPage() {
         goalData.target,
         historyData
       );
+      console.log("=== AI進捗予測レスポンス ===");
+      console.log("Success:", response.success);
       if (response.success && response.data) {
+        console.log("予測データ:", JSON.stringify(response.data, null, 2));
         setResult(response.data);
       } else {
+        console.error("エラー:", response.error);
         setError(response.error || "予測に失敗しました");
       }
     } catch (err) {
+      console.error("Error in progress prediction:", err);
       setError("エラーが発生しました");
     } finally {
       setLoading(false);

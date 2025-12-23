@@ -87,13 +87,22 @@ export default function WorkoutPlanPage() {
         equipment,
         focusAreas.length > 0 ? focusAreas : undefined
       );
+      console.log("=== AIトレーニングプラン生成レスポンス ===");
+      console.log("Success:", response.success);
       if (response.success && response.data) {
+        console.log("プランデータ:", JSON.stringify(response.data, null, 2));
         setResult(response.data);
       } else {
+        console.error("エラー:", response.error);
         setError(response.error || "プラン生成に失敗しました");
       }
     } catch (err) {
-      setError("エラーが発生しました");
+      console.error("Error in workout plan:", err);
+      setError(
+        err instanceof Error 
+          ? err.message 
+          : "エラーが発生しました。コンソールを確認してください。"
+      );
     } finally {
       setLoading(false);
     }

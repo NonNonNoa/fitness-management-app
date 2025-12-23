@@ -9,12 +9,17 @@ import {
   suggestMeals,
   generateWorkoutPlan,
   predictProgress,
+  getMotivationMessage,
   type CalorieAnalysis,
   type MealSuggestion,
   type WorkoutPlan,
   type ProgressPrediction,
+  type ChatResponse,
 } from "@/lib/ai";
 import { getSession } from "@/lib/auth";
+import { getTodayWorkouts, getWorkouts } from "@/lib/actions/workouts";
+import { getTodayMeals } from "@/lib/actions/meals";
+import { getActiveGoals } from "@/lib/actions/goals";
 
 /**
  * 認証を要求する内部ヘルパー関数
@@ -79,18 +84,22 @@ export async function getMealSuggestions(
 }> {
   try {
     await requireAuth();
+    console.log("[AI] Getting meal suggestions...");
     const suggestions = await suggestMeals(
       goalType,
       currentCalories,
       targetCalories,
       preferences
     );
+    console.log("[AI] Meal suggestions received");
     return { success: true, data: suggestions };
   } catch (error) {
     console.error("Failed to get meal suggestions:", error);
+    const errorMessage = error instanceof Error ? error.message : "提案の取得に失敗しました";
+    console.error("[AI] Error details:", errorMessage);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "提案の取得に失敗しました",
+      error: errorMessage,
     };
   }
 }
@@ -118,6 +127,7 @@ export async function getWorkoutPlan(
 }> {
   try {
     await requireAuth();
+    console.log("[AI] Generating workout plan...");
     const plan = await generateWorkoutPlan(
       goalType,
       level,
@@ -125,12 +135,15 @@ export async function getWorkoutPlan(
       equipment,
       focusAreas
     );
+    console.log("[AI] Workout plan generated");
     return { success: true, data: plan };
   } catch (error) {
     console.error("Failed to generate workout plan:", error);
+    const errorMessage = error instanceof Error ? error.message : "プラン生成に失敗しました";
+    console.error("[AI] Error details:", errorMessage);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "プラン生成に失敗しました",
+      error: errorMessage,
     };
   }
 }
@@ -168,6 +181,60 @@ export async function getProgressPrediction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "予測に失敗しました",
+    };
+  }
+}
+
+/**
+ * モチベーションメッセージを取得
+ * @param {string} userMessage - ユーザーのメッセージ
+ * @returns {Promise<{success: boolean, data?: ChatResponse, error?: string}>} モチベーションメッセージ
+ * @description マッスルマスターキャラクターがユーザーの進捗を考慮してモチベーションを上げるメッセージを生成
+ */
+export async function getMotivationChat(userMessage: string): Promise<{
+  success: boolean;
+  data?: ChatResponse;
+  error?: string;
+}> {
+  try {
+    await requireAuth();
+
+    // ユーザーの進捗情報を取得
+    const today = new Date();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - 7); // 7日前から
+
+    const [todayWorkouts, weekWorkouts, todayMeals, activeGoals] = await Promise.all([
+      getTodayWorkouts(),
+      getWorkouts(
+        weekStart.toISOString().split("T")[0],
+        today.toISOString().split("T")[0]
+      ),
+      getTodayMeals(),
+      getActiveGoals(),
+    ]);
+
+    const workoutsThisWeek = Array.isArray(weekWorkouts) ? weekWorkouts.length : 0;
+    const todayCalories = todayMeals.success
+      ? todayMeals.data?.reduce((sum, m) => sum + (m.totalCalories || 0), 0) || 0
+      : 0;
+    const goalsCount = activeGoals.success ? activeGoals.data?.length || 0 : 0;
+
+    const response = await getMotivationMessage(userMessage, {
+      workoutsThisWeek,
+      caloriesToday: todayCalories,
+      activeGoals: goalsCount,
+    });
+
+    return {
+      success: true,
+      data: response,
+    };
+  } catch (error) {
+    console.error("Failed to get motivation chat:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }

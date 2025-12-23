@@ -68,56 +68,40 @@ export default function LoginPage() {
         return;
       }
       
-      // 成功した場合、リダイレクトURLを確認
+      // 成功した場合、OAuthプロバイダーにリダイレクト
+      // BetterAuthが自動的にGoogleの認証URLを返す
       if (result?.data) {
         const data = result.data as SignInData;
         
-        // redirect: true が含まれている場合、OAuthプロバイダーにリダイレクト
+        // redirect: true の場合、OAuthプロバイダーにリダイレクト
+        // コールバック後のリダイレクトはBetterAuthのcallbacks.onOAuthCallback.redirectが処理する
         if (data.redirect && (data.url || data.redirectUrl)) {
           const redirectUrl = data.url || data.redirectUrl;
           if (redirectUrl && typeof redirectUrl === "string") {
             console.log("Redirecting to OAuth provider:", redirectUrl);
-            // 複数の方法でリダイレクトを試行（Vercel環境での確実なリダイレクトのため）
+            // OAuthプロバイダーにリダイレクト（ここで処理を停止）
+            // コールバック後のリダイレクトはBetterAuthが自動的に処理する
             if (typeof window !== "undefined") {
-              // 方法1: window.location.replace (履歴に残さない)
-              window.location.replace(redirectUrl);
-              // 方法2: フォールバックとしてwindow.location.href
-              setTimeout(() => {
-                if (window.location.href !== redirectUrl) {
-                  window.location.href = redirectUrl;
-                }
-              }, 100);
+              window.location.href = redirectUrl;
             }
-            // 状態更新を避けるため、ここで処理を停止
             return;
           }
         }
         
-        // result.dataにリダイレクトURLが含まれている場合（redirect: falseの場合）
+        // redirect: false の場合もリダイレクトURLがあれば使用
         const redirectUrl = data.url || data.redirectUrl;
         if (redirectUrl && typeof redirectUrl === "string") {
           console.log("Redirecting to:", redirectUrl);
           if (typeof window !== "undefined") {
-            window.location.replace(redirectUrl);
-          }
-          return;
-        }
-        
-        // セッションが作成された場合、callbackURLにリダイレクト
-        if (data.session || data.user) {
-          console.log("Session created, redirecting to:", callbackUrl);
-          if (typeof window !== "undefined") {
-            window.location.replace(callbackUrl);
+            window.location.href = redirectUrl;
           }
           return;
         }
       }
       
-      // リダイレクトが発生しない場合、手動でリダイレクト
-      console.log("No automatic redirect, manually redirecting to:", callbackUrl);
-      if (typeof window !== "undefined") {
-        window.location.replace(callbackUrl);
-      }
+      // 通常はここに到達しない（OAuthプロバイダーにリダイレクトされるため）
+      console.warn("Unexpected state: No redirect URL found");
+      setIsLoading(false);
     } catch (err) {
       console.error("Sign in error:", err);
       const errorMessage = err instanceof Error ? err.message : "不明なエラー";

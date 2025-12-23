@@ -50,15 +50,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 focus:ring-orange-500 shadow-lg hover:shadow-xl",
+        "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 focus:ring-purple-500 shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-500/70",
       secondary:
-        "bg-zinc-800 text-white hover:bg-zinc-700 focus:ring-zinc-500",
+        "bg-black/60 border border-purple-500/30 text-white hover:bg-black/80 hover:border-purple-500/50 focus:ring-purple-500",
       outline:
-        "border-2 border-zinc-700 text-zinc-100 hover:bg-zinc-800 focus:ring-zinc-500",
+        "border-2 border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400 focus:ring-purple-500",
       ghost:
-        "text-zinc-300 hover:bg-zinc-800 hover:text-white focus:ring-zinc-500",
+        "text-purple-300 hover:bg-purple-500/10 hover:text-white focus:ring-purple-500",
       danger:
-        "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+        "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-lg shadow-red-500/50",
     };
 
     const sizes = {

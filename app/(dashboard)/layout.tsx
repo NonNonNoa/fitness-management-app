@@ -10,6 +10,7 @@ import {
   Menu, X 
 } from "lucide-react";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { MusicPlayer } from "@/components/ui/music-player";
 import { useState } from "react";
 
 const sidebarItems = [
@@ -46,11 +47,11 @@ export default function DashboardLayout({
 
   if (isPending) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full shadow-[0_0_20px_rgba(168,85,247,0.6)]"
         />
       </div>
     );
@@ -61,22 +62,22 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 relative">
-      {/* アニメーション背景オーバーレイ */}
+    <div className="min-h-screen bg-black relative">
+      {/* アニメーション背景オーバーレイ - Phonkテーマ */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-400/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 bg-zinc-900/95 backdrop-blur-lg border-r border-zinc-800 flex-col">
+      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 bg-black/80 backdrop-blur-lg border-r border-purple-500/30 flex-col shadow-[0_0_30px_rgba(168,85,247,0.2)]">
         {/* Logo */}
         <div className="p-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.6)]">
               <Dumbbell className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">FitTrack</span>
+            <span className="text-xl font-black text-white tracking-tight">XPLOSION</span>
           </Link>
         </div>
 
@@ -92,8 +93,8 @@ export default function DashboardLayout({
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                       isActive
-                        ? "bg-orange-500/10 text-orange-400"
-                        : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                        ? "bg-purple-500/20 text-purple-300 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                        : "text-purple-300/70 hover:text-white hover:bg-purple-500/10"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -101,7 +102,7 @@ export default function DashboardLayout({
                     {isActive && (
                       <motion.div
                         layoutId="sidebarIndicator"
-                        className="absolute left-0 w-1 h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-r-full"
+                        className="absolute left-0 w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-r-full shadow-[0_0_10px_rgba(168,85,247,0.8)]"
                       />
                     )}
                   </Link>
@@ -112,9 +113,9 @@ export default function DashboardLayout({
         </nav>
 
         {/* User */}
-        <div className="p-4 border-t border-zinc-800">
+        <div className="p-4 border-t border-purple-500/30">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-black/60 border border-purple-500/30 overflow-hidden">
               {session.user?.image ? (
                 <img
                   src={session.user.image}
@@ -122,16 +123,16 @@ export default function DashboardLayout({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-600">
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
                   <User className="w-5 h-5 text-white" />
                 </div>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
+              <p className="text-sm font-bold text-white truncate">
                 {session.user?.name}
               </p>
-              <p className="text-xs text-zinc-500 truncate">
+              <p className="text-xs text-purple-300/70 truncate">
                 {session.user?.email}
               </p>
             </div>
@@ -140,13 +141,13 @@ export default function DashboardLayout({
       </aside>
 
       {/* Mobile Header */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur-lg border-b border-zinc-800">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-lg border-b border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
         <div className="flex items-center justify-between px-4 h-14">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.6)]">
               <Dumbbell className="w-4 h-4 text-white" />
             </div>
-            <span className="text-lg font-bold text-white">FitTrack</span>
+            <span className="text-lg font-black text-white tracking-tight">XPLOSION</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -177,14 +178,14 @@ export default function DashboardLayout({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="md:hidden fixed left-0 top-0 bottom-0 w-64 z-50 bg-zinc-900 border-r border-zinc-800"
+              className="md:hidden fixed left-0 top-0 bottom-0 w-64 z-50 bg-black/95 backdrop-blur-lg border-r border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.3)]"
             >
               <div className="p-6">
                 <Link href="/dashboard" className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.6)]">
                     <Dumbbell className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-xl font-bold text-white">FitTrack</span>
+                  <span className="text-xl font-black text-white tracking-tight">XPLOSION</span>
                 </Link>
               </div>
               <nav className="px-3 py-4">
@@ -198,8 +199,8 @@ export default function DashboardLayout({
                           href={item.href}
                           className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                             isActive
-                              ? "bg-orange-500/10 text-orange-400"
-                              : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                              ? "bg-purple-500/20 text-purple-300 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                              : "text-purple-300/70 hover:text-white hover:bg-purple-500/10"
                           }`}
                         >
                           <Icon className="w-5 h-5" />
@@ -237,6 +238,9 @@ export default function DashboardLayout({
 
       {/* Bottom Nav (Mobile) */}
       <BottomNav />
+
+      {/* Music Player */}
+      <MusicPlayer />
     </div>
   );
 }

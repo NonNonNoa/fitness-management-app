@@ -111,16 +111,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center p-4">
-      {/* 背景のグラデーション効果 */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-900/20 via-transparent to-transparent" />
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+      {/* 背景のグラデーション効果 - Phonkテーマ */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-black to-pink-900/30" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-pink-500/20" />
+      
+      {/* グロー効果 */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px] animate-pulse" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
       
       <div className="relative z-10 w-full max-w-md">
-        {/* ロゴ・タイトル */}
+        {/* ロゴ・タイトル - Phonkテーマ */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-red-600 mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 mb-4 shadow-[0_0_30px_rgba(168,85,247,0.6)] animate-glow">
             <svg
-              className="w-8 h-8 text-white"
+              className="w-10 h-10 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -128,32 +133,35 @@ export default function LoginPage() {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={2.5}
                 d="M13 10V3L4 14h7v7l9-11h-7z"
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            フィットネスAI
+          <h1 className="text-5xl font-black text-white mb-2 tracking-tight drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+            XPLOSION
           </h1>
-          <p className="text-zinc-400">
-            AIでトレーニングと食事を最適化
+          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 mb-2">
+            FITNESS
+          </h2>
+          <p className="text-purple-300 font-medium">
+            EXPLODE YOUR LIMITS
           </p>
         </div>
 
-        <Card className="backdrop-blur-sm bg-zinc-900/80">
+        <Card className="backdrop-blur-md bg-black/60 border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-white">
-                ログイン
+              <h2 className="text-2xl font-bold text-white mb-2">
+                LOGIN
               </h2>
-              <p className="mt-2 text-sm text-zinc-400">
+              <p className="mt-2 text-sm text-purple-300">
                 アカウントにログインして始めましょう
               </p>
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+              <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-sm text-center shadow-[0_0_15px_rgba(239,68,68,0.3)]">
                 {error}
               </div>
             )}
@@ -161,7 +169,7 @@ export default function LoginPage() {
             <Button
               variant="outline"
               size="lg"
-              className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 hover:bg-zinc-100 border-0"
+              className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 border-0 font-bold shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-[0_0_30px_rgba(168,85,247,0.8)] transition-all duration-300"
               onClick={handleGoogleSignIn}
               isLoading={isLoading}
             >
@@ -190,20 +198,20 @@ export default function LoginPage() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-700" />
+                <div className="w-full border-t border-purple-500/30" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-zinc-900 text-zinc-500">
+                <span className="px-2 bg-black/60 text-purple-300">
                   または
                 </span>
               </div>
             </div>
 
-            <p className="text-center text-sm text-zinc-400">
+            <p className="text-center text-sm text-purple-300">
               アカウントをお持ちでない方は{" "}
               <Link
                 href="/signup"
-                className="text-orange-400 hover:text-orange-300 font-medium"
+                className="text-pink-400 hover:text-pink-300 font-bold underline decoration-pink-400/50 hover:decoration-pink-300 transition-colors"
               >
                 新規登録
               </Link>
@@ -211,13 +219,13 @@ export default function LoginPage() {
           </div>
         </Card>
 
-        <p className="mt-8 text-center text-xs text-zinc-500">
+        <p className="mt-8 text-center text-xs text-purple-400/70">
           ログインすることで、
-          <Link href="#" className="underline hover:text-zinc-400">
+          <Link href="#" className="underline hover:text-purple-300 transition-colors">
             利用規約
           </Link>
           と
-          <Link href="#" className="underline hover:text-zinc-400">
+          <Link href="#" className="underline hover:text-purple-300 transition-colors">
             プライバシーポリシー
           </Link>
           に同意したことになります。

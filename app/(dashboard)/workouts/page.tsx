@@ -22,12 +22,12 @@ export default async function WorkoutsPage() {
       {/* ヘッダー */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">トレーニング記録</h1>
-          <p className="text-zinc-400 mt-1">日々のトレーニングを記録・管理</p>
+          <h1 className="text-2xl font-black text-white drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]">トレーニング記録</h1>
+          <p className="text-purple-300/70 mt-1 font-medium">日々のトレーニングを記録・管理</p>
         </div>
         <Link
           href="/workouts/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium hover:from-orange-600 hover:to-red-700 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:from-purple-500 hover:to-pink-500 transition-all shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-[0_0_30px_rgba(168,85,247,0.8)]"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -41,7 +41,7 @@ export default async function WorkoutsPage() {
         <Card>
           <div className="text-center py-12">
             <svg
-              className="w-16 h-16 mx-auto mb-4 text-zinc-600"
+              className="w-16 h-16 mx-auto mb-4 text-purple-400/50"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -53,10 +53,10 @@ export default async function WorkoutsPage() {
                 d="M13 10V3L4 14h7v7l9-11h-7z"
               />
             </svg>
-            <p className="text-zinc-400 mb-4">まだトレーニング記録がありません</p>
+            <p className="text-purple-300/70 mb-4 font-medium">まだトレーニング記録がありません</p>
             <Link
               href="/workouts/new"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium hover:from-orange-600 hover:to-red-700 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:from-purple-500 hover:to-pink-500 transition-all shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-[0_0_30px_rgba(168,85,247,0.8)]"
             >
               最初のトレーニングを記録する
             </Link>
@@ -77,9 +77,9 @@ export default async function WorkoutsPage() {
             return (
               <div key={date}>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-semibold text-white">{formattedDate}</h2>
-                  <span className="text-sm text-zinc-400">
-                    総ボリューム: <span className="text-orange-400 font-medium">{totalVolume.toLocaleString()}</span> kg
+                  <h2 className="text-lg font-bold text-white">{formattedDate}</h2>
+                  <span className="text-sm text-purple-300/70">
+                    総ボリューム: <span className="text-purple-300 font-bold drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">{totalVolume.toLocaleString()}</span> kg
                   </span>
                 </div>
                 <div className="grid gap-3">
@@ -99,41 +99,41 @@ export default async function WorkoutsPage() {
 function WorkoutCard({ workout }: { workout: Awaited<ReturnType<typeof getWorkouts>>[number] }) {
   return (
     <Link href={`/workouts/${workout.id}`}>
-      <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-all group">
+      <div className="p-4 bg-black/60 border border-purple-500/30 rounded-xl hover:border-purple-400/50 transition-all group shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.6)]">
               <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
             <div>
-              <span className="font-medium text-white group-hover:text-orange-400 transition-colors">
+              <span className="font-bold text-white group-hover:text-purple-300 transition-colors">
                 トレーニング
               </span>
               {workout.durationMinutes && (
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-purple-300/60 font-medium">
                   {workout.durationMinutes}分
                 </p>
               )}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-lg font-bold text-white">
+            <div className="text-lg font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
               {(workout.totalVolume || 0).toLocaleString()}
             </div>
-            <div className="text-xs text-zinc-500">kg (総ボリューム)</div>
+            <div className="text-xs text-purple-300/60 font-medium">kg (総ボリューム)</div>
           </div>
         </div>
         
         {/* 追加情報 */}
-        <div className="flex gap-4 mt-3 pt-3 border-t border-zinc-800">
+        <div className="flex gap-4 mt-3 pt-3 border-t border-purple-500/20">
           <div className="text-xs">
-            <span className="text-zinc-500">消費カロリー</span>{" "}
-            <span className="text-zinc-300">{workout.caloriesBurned || 0} kcal</span>
+            <span className="text-purple-300/60 font-medium">消費カロリー</span>{" "}
+            <span className="text-purple-300 font-bold">{workout.caloriesBurned || 0} kcal</span>
           </div>
           {workout.notes && (
-            <div className="text-xs text-zinc-500 truncate flex-1">
+            <div className="text-xs text-purple-300/60 truncate flex-1 font-medium">
               {workout.notes}
             </div>
           )}

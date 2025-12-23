@@ -38,7 +38,7 @@ export function BottomNav() {
     <motion.nav
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur-lg border-t border-zinc-800 md:hidden safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-lg border-t border-purple-500/30 md:hidden safe-area-bottom shadow-[0_0_30px_rgba(168,85,247,0.2)]"
     >
       <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
@@ -54,14 +54,14 @@ export function BottomNav() {
               <motion.div
                 className={cn(
                   "flex flex-col items-center justify-center gap-0.5 p-2 rounded-xl transition-colors",
-                  isActive ? "text-orange-500" : "text-zinc-500"
+                  isActive ? "text-purple-300" : "text-purple-300/50"
                 )}
                 whileTap={{ scale: 0.9 }}
               >
                 {isActive && (
                   <motion.div
                     layoutId="bottomNavIndicator"
-                    className="absolute inset-x-2 top-1 h-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full"
+                    className="absolute inset-x-2 top-1 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.8)]"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}

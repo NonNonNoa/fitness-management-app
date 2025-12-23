@@ -10,13 +10,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "FitTrack - フィットネス管理アプリ",
+  title: "Xplosion Fitness - フィットネス管理アプリ",
   description: "食事とトレーニングを記録し、AIがあなたの目標達成をサポートします",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "FitTrack",
+    title: "Xplosion Fitness",
   },
 };
 
@@ -25,7 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#09090b",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={inter.variable}>
-      <body className="bg-zinc-950 text-white antialiased">
+      <body className="bg-black text-white antialiased">
         <ToastProvider>
           {children}
         </ToastProvider>

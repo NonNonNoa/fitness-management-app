@@ -30,10 +30,10 @@ export function AnimatedButton({
   const baseStyles = "inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900";
   
   const variantStyles: Record<ButtonVariant, string> = {
-    primary: "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 focus:ring-orange-500",
-    secondary: "bg-zinc-800 text-white border border-zinc-700 hover:bg-zinc-700 focus:ring-zinc-500",
-    ghost: "text-zinc-400 hover:text-white hover:bg-zinc-800/50 focus:ring-zinc-500",
-    danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+    primary: "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 focus:ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-[0_0_30px_rgba(168,85,247,0.8)]",
+    secondary: "bg-black/60 text-white border border-purple-500/30 hover:bg-black/80 hover:border-purple-500/50 focus:ring-purple-500",
+    ghost: "text-purple-300/70 hover:text-white hover:bg-purple-500/10 focus:ring-purple-500",
+    danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]",
   };
   
   const sizeStyles: Record<ButtonSize, string> = {
@@ -54,6 +54,7 @@ export function AnimatedButton({
         sizeStyles[size],
         fullWidth && "w-full",
         (disabled || loading) && "opacity-50 cursor-not-allowed",
+        "font-bold",
         className
       )}
       {...props}

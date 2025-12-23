@@ -31,7 +31,7 @@ export default function MealsPage() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full shadow-[0_0_20px_rgba(168,85,247,0.6)]"
         />
       </div>
     );
@@ -60,7 +60,7 @@ export default function MealsPage() {
       >
         <div>
           <motion.h1 
-            className="text-2xl font-bold text-white bg-gradient-to-r from-white via-orange-100 to-white bg-clip-text text-transparent"
+            className="text-2xl font-black text-white bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
@@ -68,7 +68,7 @@ export default function MealsPage() {
             食事記録
           </motion.h1>
           <motion.p 
-            className="text-zinc-400 mt-1"
+            className="text-purple-300/70 mt-1 font-medium"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -85,7 +85,7 @@ export default function MealsPage() {
         >
           <Link
             href="/meals/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium hover:from-orange-600 hover:to-red-700 transition-all shadow-lg shadow-orange-500/20"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:from-purple-500 hover:to-pink-500 transition-all shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-[0_0_30px_rgba(168,85,247,0.8)]"
           >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -100,7 +100,7 @@ export default function MealsPage() {
         <Card>
           <div className="text-center py-12">
             <svg
-              className="w-16 h-16 mx-auto mb-4 text-zinc-600"
+              className="w-16 h-16 mx-auto mb-4 text-purple-400/50"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -112,10 +112,10 @@ export default function MealsPage() {
                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
               />
             </svg>
-            <p className="text-zinc-400 mb-4">まだ食事記録がありません</p>
+            <p className="text-purple-300/70 mb-4 font-medium">まだ食事記録がありません</p>
             <Link
               href="/meals/new"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium hover:from-orange-600 hover:to-red-700 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:from-purple-500 hover:to-pink-500 transition-all shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-[0_0_30px_rgba(168,85,247,0.8)]"
             >
               最初の食事を記録する
             </Link>
@@ -141,9 +141,9 @@ export default function MealsPage() {
                 transition={{ delay: 0.3 + sortedDates.indexOf(date) * 0.1 }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-semibold text-white">{formattedDate}</h2>
-                  <span className="text-sm text-zinc-400">
-                    合計: <span className="text-orange-400 font-medium">{totalCalories}</span> kcal
+                  <h2 className="text-lg font-bold text-white">{formattedDate}</h2>
+                  <span className="text-sm text-purple-300/70">
+                    合計: <span className="text-purple-300 font-bold drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">{totalCalories}</span> kcal
                   </span>
                 </div>
                 <div className="grid gap-3">
@@ -173,10 +173,10 @@ function MealCard({ meal }: { meal: Awaited<ReturnType<typeof getMeals>>[number]
   return (
     <Link href={`/meals/${meal.id}`}>
       <motion.div 
-        className="p-4 bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50 rounded-xl 
-                   hover:border-orange-500/30 hover:bg-zinc-800/90 
+        className="p-4 bg-black/60 backdrop-blur-md border border-purple-500/30 rounded-xl 
+                   hover:border-purple-400/50 hover:bg-black/80 
                    transition-all group relative overflow-hidden
-                   shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-orange-500/10
+                   shadow-lg shadow-black/20 shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-xl hover:shadow-purple-500/30
                    before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
                    hover:before:opacity-100"
         whileHover={{ scale: 1.02, y: -4 }}
@@ -197,36 +197,36 @@ function MealCard({ meal }: { meal: Awaited<ReturnType<typeof getMeals>>[number]
             </motion.div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-medium text-white group-hover:text-orange-400 transition-colors">
+                <span className="font-bold text-white group-hover:text-purple-300 transition-colors">
                   {getMealTypeLabel(meal.mealType || "snack")}
                 </span>
                 {meal.mealTime && (
-                  <span className="text-xs text-zinc-500">{meal.mealTime}</span>
+                  <span className="text-xs text-purple-300/60 font-medium">{meal.mealTime}</span>
                 )}
               </div>
               {meal.notes && (
-                <p className="text-sm text-zinc-500 mt-1 line-clamp-1">{meal.notes}</p>
+                <p className="text-sm text-purple-300/60 mt-1 line-clamp-1 font-medium">{meal.notes}</p>
               )}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-lg font-bold text-white">{meal.totalCalories || 0}</div>
-            <div className="text-xs text-zinc-500">kcal</div>
+            <div className="text-lg font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">{meal.totalCalories || 0}</div>
+            <div className="text-xs text-purple-300/60 font-medium">kcal</div>
           </div>
         </div>
         {/* 栄養素 */}
-        <div className="flex gap-4 mt-3 pt-3 border-t border-zinc-800">
+        <div className="flex gap-4 mt-3 pt-3 border-t border-purple-500/20">
           <div className="text-xs">
-            <span className="text-zinc-500">P</span>{" "}
-            <span className="text-zinc-300">{meal.totalProtein?.toFixed(1) || 0}g</span>
+            <span className="text-purple-300/60 font-medium">P</span>{" "}
+            <span className="text-purple-300 font-bold">{meal.totalProtein?.toFixed(1) || 0}g</span>
           </div>
           <div className="text-xs">
-            <span className="text-zinc-500">C</span>{" "}
-            <span className="text-zinc-300">{meal.totalCarbs?.toFixed(1) || 0}g</span>
+            <span className="text-purple-300/60 font-medium">C</span>{" "}
+            <span className="text-purple-300 font-bold">{meal.totalCarbs?.toFixed(1) || 0}g</span>
           </div>
           <div className="text-xs">
-            <span className="text-zinc-500">F</span>{" "}
-            <span className="text-zinc-300">{meal.totalFats?.toFixed(1) || 0}g</span>
+            <span className="text-purple-300/60 font-medium">F</span>{" "}
+            <span className="text-purple-300 font-bold">{meal.totalFats?.toFixed(1) || 0}g</span>
           </div>
         </div>
       </motion.div>

@@ -31,18 +31,18 @@ export function AnimatedCard({
       } : undefined}
       whileTap={hoverable ? { scale: 0.98 } : undefined}
       className={cn(
-        "bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-5",
-        "shadow-xl shadow-black/30",
+        "bg-black/60 backdrop-blur-md border border-purple-500/30 rounded-2xl p-5",
+        "shadow-xl shadow-black/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]",
         "relative overflow-hidden",
-        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-orange-500/0 before:to-purple-500/0 before:opacity-0 before:transition-opacity before:duration-300",
-        hoverable && "cursor-pointer transition-all hover:border-orange-500/30 hover:shadow-orange-500/10 hover:shadow-2xl hover:before:opacity-100",
+        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-500/0 before:to-pink-500/0 before:opacity-0 before:transition-opacity before:duration-300",
+        hoverable && "cursor-pointer transition-all hover:border-purple-400/50 hover:shadow-purple-500/30 hover:shadow-2xl hover:before:opacity-100",
         className
       )}
       {...props}
     >
       {title && (
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <span className="w-1 h-5 bg-gradient-to-b from-orange-500 to-red-600 rounded-full" />
+        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span className="w-1 h-5 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
           {title}
         </h3>
       )}
@@ -67,11 +67,11 @@ export function StatsCard({
   delay?: number;
 }) {
   const colorClasses = {
-    orange: "from-orange-500 to-red-600",
-    green: "from-green-500 to-emerald-600",
-    blue: "from-blue-500 to-cyan-600",
+    orange: "from-purple-500 to-pink-600",
+    green: "from-purple-500 to-pink-600",
+    blue: "from-purple-500 to-pink-600",
     purple: "from-purple-500 to-pink-600",
-    red: "from-red-500 to-rose-600",
+    red: "from-pink-500 to-purple-600",
   };
 
   return (
@@ -84,19 +84,19 @@ export function StatsCard({
         y: -4,
         transition: { duration: 0.2 }
       }}
-      className="bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-5 relative overflow-hidden group cursor-pointer
-                 shadow-xl shadow-black/30
+      className="bg-black/60 backdrop-blur-md border border-purple-500/30 rounded-2xl p-5 relative overflow-hidden group cursor-pointer
+                 shadow-xl shadow-black/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]
                  before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
-                 hover:border-orange-500/30 hover:shadow-orange-500/10 hover:shadow-2xl hover:before:opacity-100"
+                 hover:border-purple-400/50 hover:shadow-purple-500/30 hover:shadow-2xl hover:before:opacity-100"
       style={{
         background: `linear-gradient(135deg, rgba(39, 39, 42, 0.9) 0%, rgba(24, 24, 27, 0.9) 100%)`,
       }}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-zinc-400 text-sm">{title}</p>
+          <p className="text-purple-300/70 text-sm font-medium">{title}</p>
           <motion.p
-            className="text-3xl font-bold text-white mt-1"
+            className="text-3xl font-black text-white mt-1 drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: delay + 0.2 }}
@@ -104,7 +104,7 @@ export function StatsCard({
             {value}
           </motion.p>
           {subtitle && (
-            <p className="text-zinc-500 text-sm mt-1">{subtitle}</p>
+            <p className="text-purple-300/60 text-sm mt-1">{subtitle}</p>
           )}
         </div>
         {icon && (
@@ -149,17 +149,17 @@ export function ProgressCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5"
+      className="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-5 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
     >
       <div className="flex justify-between items-start mb-3">
-        <p className="text-zinc-400 text-sm">{title}</p>
-        <span className="text-xs text-zinc-500">{percentage.toFixed(0)}%</span>
+        <p className="text-purple-300/70 text-sm font-medium">{title}</p>
+        <span className="text-xs text-purple-300/60">{percentage.toFixed(0)}%</span>
       </div>
       <div className="flex items-baseline gap-1 mb-3">
         <span className="text-2xl font-bold text-white">{current.toLocaleString()}</span>
-        <span className="text-zinc-500">/ {target.toLocaleString()} {unit}</span>
+        <span className="text-purple-300/60">/ {target.toLocaleString()} {unit}</span>
       </div>
-      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+      <div className="h-2 bg-purple-500/20 rounded-full overflow-hidden">
         <motion.div
           className={`h-full bg-gradient-to-r ${colorClasses[color]} rounded-full`}
           initial={{ width: 0 }}

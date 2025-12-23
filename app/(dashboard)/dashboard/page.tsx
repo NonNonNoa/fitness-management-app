@@ -209,7 +209,7 @@ export default function DashboardPage() {
       >
         <div className="relative">
           <motion.h1 
-            className="text-2xl md:text-3xl font-bold text-white bg-gradient-to-r from-white via-orange-100 to-white bg-clip-text text-transparent"
+            className="text-2xl md:text-3xl font-black text-white bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
@@ -217,12 +217,12 @@ export default function DashboardPage() {
             こんにちは、{session?.user?.name?.split(" ")[0] || "ユーザー"}さん！
           </motion.h1>
           <motion.p 
-            className="text-zinc-400 mt-1 flex items-center gap-2"
+            className="text-purple-300/70 mt-1 flex items-center gap-2 font-medium"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+            <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
             {today}
           </motion.p>
         </div>
@@ -283,8 +283,8 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
         >
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Target className="w-5 h-5 text-orange-500" />
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <Target className="w-5 h-5 text-purple-400" />
             アクティブな目標
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -351,8 +351,8 @@ export default function DashboardPage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8 + index * 0.1 }}
                   whileHover={{ scale: 1.02, x: 4 }}
-                  className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-xl
-                             hover:bg-zinc-800/80 border border-transparent hover:border-zinc-700/50
+                  className="flex items-center gap-3 p-3 bg-black/40 border border-purple-500/20 rounded-xl
+                             hover:bg-black/60 hover:border-purple-500/40
                              transition-all duration-300 cursor-pointer group"
                 >
                   <motion.div 
@@ -371,14 +371,14 @@ export default function DashboardPage() {
                   </motion.div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white truncate">{activity.title}</p>
-                    <p className="text-xs text-zinc-500">{activity.date}</p>
+                    <p className="text-xs text-purple-300/60">{activity.date}</p>
                   </div>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-zinc-500">
-              <Activity className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
+            <div className="text-center py-8 text-purple-300/60">
+              <Activity className="w-12 h-12 mx-auto mb-3 text-purple-400/50" />
               <p>まだアクティビティがありません</p>
               <p className="text-sm mt-1">食事やトレーニングを記録して始めましょう！</p>
             </div>
@@ -420,7 +420,7 @@ export default function DashboardPage() {
             AIがあなたのトレーニングをサポート
           </motion.h3>
           <motion.p 
-            className="text-zinc-400 text-sm mb-4"
+            className="text-purple-300/70 text-sm mb-4 font-medium"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.1 }}
@@ -492,31 +492,31 @@ function GoalCard({
 
   const getGoalColor = () => {
     switch (goal.type) {
-      case "weight_loss": return "from-blue-500 to-cyan-600";
-      case "weight_gain": return "from-green-500 to-emerald-600";
-      case "strength": return "from-orange-500 to-red-600";
+      case "weight_loss": return "from-purple-500 to-pink-600";
+      case "weight_gain": return "from-purple-500 to-pink-600";
+      case "strength": return "from-purple-500 to-pink-600";
       case "muscle_gain": return "from-purple-500 to-pink-600";
-      default: return "from-zinc-500 to-zinc-600";
+      default: return "from-purple-500 to-pink-600";
     }
   };
 
   const getBorderColor = () => {
     switch (goal.type) {
-      case "weight_loss": return "border-blue-500/30";
-      case "weight_gain": return "border-green-500/30";
-      case "strength": return "border-orange-500/30";
+      case "weight_loss": return "border-purple-500/30";
+      case "weight_gain": return "border-purple-500/30";
+      case "strength": return "border-purple-500/30";
       case "muscle_gain": return "border-purple-500/30";
-      default: return "border-zinc-700";
+      default: return "border-purple-500/30";
     }
   };
 
   const getStatusBadgeClass = () => {
     switch (goal.type) {
-      case "weight_loss": return "bg-blue-500/20 text-blue-400";
-      case "weight_gain": return "bg-green-500/20 text-green-400";
-      case "strength": return "bg-orange-500/20 text-orange-400";
-      case "muscle_gain": return "bg-purple-500/20 text-purple-400";
-      default: return "bg-zinc-700 text-zinc-400";
+      case "weight_loss": return "bg-purple-500/20 text-purple-300";
+      case "weight_gain": return "bg-purple-500/20 text-purple-300";
+      case "strength": return "bg-purple-500/20 text-purple-300";
+      case "muscle_gain": return "bg-purple-500/20 text-purple-300";
+      default: return "bg-purple-500/20 text-purple-300";
     }
   };
 
@@ -555,10 +555,10 @@ function GoalCard({
     >
       <Link href={`/goals/${goal.id}`}>
         <motion.div 
-          className={`p-4 bg-zinc-900/90 backdrop-blur-md border ${getBorderColor()} rounded-xl relative overflow-hidden group
-                     shadow-xl shadow-black/20
+          className={`p-4 bg-black/60 backdrop-blur-md border ${getBorderColor()} rounded-xl relative overflow-hidden group
+                     shadow-xl shadow-black/20 shadow-[0_0_20px_rgba(168,85,247,0.2)]
                      before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
-                     hover:bg-zinc-800/90 hover:border-opacity-100 hover:shadow-2xl hover:shadow-orange-500/10 hover:before:opacity-100
+                     hover:bg-black/80 hover:border-purple-400/50 hover:shadow-2xl hover:shadow-purple-500/30 hover:before:opacity-100
                      transition-all duration-300`}
           whileHover={{ scale: 1.02, y: -4 }}
           whileTap={{ scale: 0.98 }}
@@ -577,7 +577,7 @@ function GoalCard({
                   <span>{getGoalEmoji()}</span>
                   <span>{getGoalTypeLabel(goal.type)}</span>
                 </h3>
-                <p className="text-xs text-zinc-500">目標</p>
+                <p className="text-xs text-purple-300/60">目標</p>
               </div>
             </div>
             <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass()}`}>
@@ -588,17 +588,17 @@ function GoalCard({
           {/* 減量・増量の場合 */}
           {(goal.type === "weight_loss" || goal.type === "weight_gain") && (
             <div className="space-y-3">
-              <div className="p-3 bg-zinc-800/50 rounded-lg">
-                <p className="text-xs text-zinc-500 mb-1">現在の体重 → 目標体重</p>
+              <div className="p-3 bg-black/40 border border-purple-500/20 rounded-lg">
+                <p className="text-xs text-purple-300/60 mb-1 font-medium">現在の体重 → 目標体重</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-white">
+                  <span className="text-2xl font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
                     {goal.currentWeightKg || "-"}
                   </span>
-                  <span className="text-zinc-400">→</span>
-                  <span className="text-2xl font-bold text-white">
+                  <span className="text-purple-300/70">→</span>
+                  <span className="text-2xl font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
                     {goal.targetWeightKg || "-"}
                   </span>
-                  <span className="text-sm text-zinc-400">kg</span>
+                  <span className="text-sm text-purple-300/60">kg</span>
                 </div>
               </div>
               {goal.currentWeightKg && goal.targetWeightKg && (
@@ -612,32 +612,28 @@ function GoalCard({
                         ) : (
                           <TrendingUp className="w-4 h-4 text-green-400" />
                         )}
-                        <span className="text-sm text-zinc-400">
+                        <span className="text-sm text-purple-300/70">
                           あと{" "}
-                          <span className={`font-bold ${goal.type === "weight_loss" ? "text-blue-400" : "text-green-400"}`}>
+                          <span className={`font-bold text-purple-300`}>
                             {Math.abs(goal.targetWeightKg - goal.currentWeightKg).toFixed(1)} kg
                           </span>
                         </span>
                       </div>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-purple-300/60 font-medium">
                         {goal.type === "weight_loss" ? "減量" : "増量"}
                       </span>
                     </div>
                     {/* ビジュアルプログレスバー（目標に近づくほど埋まる） */}
                     <div className="relative">
-                      <div className="h-3 bg-zinc-700 rounded-full overflow-hidden">
+                      <div className="h-3 bg-purple-500/20 rounded-full overflow-hidden">
                         <div
-                          className={`h-full transition-all duration-700 rounded-full ${
-                            goal.type === "weight_loss" 
-                              ? "bg-gradient-to-r from-blue-500 to-cyan-400" 
-                              : "bg-gradient-to-r from-green-500 to-emerald-400"
-                          }`}
+                          className="h-full transition-all duration-700 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
                           style={{ 
                             width: `${Math.max(5, 100 - (Math.abs(goal.targetWeightKg - goal.currentWeightKg) / Math.max(goal.currentWeightKg, goal.targetWeightKg)) * 100)}%` 
                           }}
                         />
                       </div>
-                      <div className="flex justify-between mt-1 text-xs text-zinc-500">
+                      <div className="flex justify-between mt-1 text-xs text-purple-300/60">
                         <span>開始</span>
                         <span>🎯 目標達成</span>
                       </div>
@@ -652,45 +648,45 @@ function GoalCard({
           {goal.type === "strength" && (
             <div className="space-y-3">
               {goal.exerciseName && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                  <Dumbbell className="w-4 h-4 text-orange-400" />
-                  <span className="text-sm font-semibold text-orange-400">{goal.exerciseName}</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-lg">
+                  <Dumbbell className="w-4 h-4 text-purple-300" />
+                  <span className="text-sm font-bold text-purple-300">{goal.exerciseName}</span>
                 </div>
               )}
-              <div className="p-3 bg-zinc-800/50 rounded-lg">
-                <p className="text-xs text-zinc-500 mb-1">現在の重量 → 目標重量</p>
+              <div className="p-3 bg-black/40 border border-purple-500/20 rounded-lg">
+                <p className="text-xs text-purple-300/60 mb-1 font-medium">現在の重量 → 目標重量</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-white">
+                  <span className="text-2xl font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
                     {goal.currentValue || "-"}
                   </span>
-                  <span className="text-zinc-400">→</span>
-                  <span className="text-2xl font-bold text-white">
+                  <span className="text-purple-300/70">→</span>
+                  <span className="text-2xl font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
                     {goal.targetValue || "-"}
                   </span>
-                  <span className="text-sm text-zinc-400">kg</span>
+                  <span className="text-sm text-purple-300/60">kg</span>
                 </div>
               </div>
               {goal.currentValue && goal.targetValue && (
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-zinc-400">
+                    <span className="text-sm text-purple-300/70">
                       あと{" "}
-                      <span className="font-bold text-orange-400">
+                      <span className="font-bold text-purple-300">
                         +{(goal.targetValue - goal.currentValue).toFixed(1)} kg
                       </span>
                     </span>
-                    <span className="text-sm font-bold text-orange-400">
+                    <span className="text-sm font-black text-purple-300 drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
                       {progress?.toFixed(0)}%
                     </span>
                   </div>
                   <div className="relative">
-                    <div className="h-3 bg-zinc-700 rounded-full overflow-hidden">
+                    <div className="h-3 bg-purple-500/20 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-700 rounded-full"
+                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-700 rounded-full"
                         style={{ width: `${progress || 0}%` }}
                       />
                     </div>
-                    <div className="flex justify-between mt-1 text-xs text-zinc-500">
+                    <div className="flex justify-between mt-1 text-xs text-purple-300/60">
                       <span>0kg</span>
                       <span>🎯 {goal.targetValue}kg</span>
                     </div>
@@ -703,7 +699,7 @@ function GoalCard({
           {/* 筋肉量アップの場合 */}
           {goal.type === "muscle_gain" && (
             <div className="space-y-3">
-              <div className="p-3 bg-zinc-800/50 rounded-lg space-y-3">
+              <div className="p-3 bg-black/40 border border-purple-500/20 rounded-lg space-y-3">
                 {goal.currentMuscleMassKg && goal.targetMuscleMassKg && (
                   <MuscleProgressItem
                     label="筋肉量"
@@ -743,7 +739,7 @@ function GoalCard({
                 )}
               </div>
               {!goal.currentMuscleMassKg && !goal.currentArmCm && !goal.currentChestCm && !goal.currentWaistCm && (
-                <p className="text-sm text-zinc-500 text-center py-2">
+                <p className="text-sm text-purple-300/60 text-center py-2 font-medium">
                   タップして詳細を設定 →
                 </p>
               )}
@@ -767,9 +763,9 @@ function QuickAction({
   color: "green" | "orange" | "blue" | "purple";
 }) {
   const colorClasses = {
-    green: "from-green-500 to-emerald-600",
-    orange: "from-orange-500 to-red-600",
-    blue: "from-blue-500 to-cyan-600",
+    green: "from-purple-500 to-pink-600",
+    orange: "from-purple-500 to-pink-600",
+    blue: "from-purple-500 to-pink-600",
     purple: "from-purple-500 to-pink-600",
   };
 
@@ -784,10 +780,10 @@ function QuickAction({
           transition: { duration: 0.2 }
         }}
         whileTap={{ scale: 0.95 }}
-        className="flex flex-col items-center gap-2 p-4 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800/50 rounded-xl 
-                   hover:bg-zinc-800/80 hover:border-orange-500/30 
+        className="flex flex-col items-center gap-2 p-4 bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl 
+                   hover:bg-black/80 hover:border-purple-400/50 
                    transition-all duration-300 relative overflow-hidden group
-                   shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-orange-500/10
+                   shadow-lg shadow-black/20 shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-xl hover:shadow-purple-500/30
                    before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
                    hover:before:opacity-100"
       >
@@ -797,7 +793,7 @@ function QuickAction({
         >
           <div className="text-white">{icon}</div>
         </motion.div>
-        <span className="text-sm text-zinc-300 font-medium group-hover:text-white transition-colors">{label}</span>
+        <span className="text-sm text-purple-300 font-bold group-hover:text-white transition-colors">{label}</span>
       </motion.div>
     </Link>
   );
@@ -832,23 +828,23 @@ function MuscleProgressItem({
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between items-center">
-        <span className="text-xs text-zinc-400 flex items-center gap-1">
+        <span className="text-xs text-purple-300/70 flex items-center gap-1 font-medium">
           <span>{emoji}</span> {label}
         </span>
-        <span className="text-xs text-zinc-300">
+        <span className="text-xs text-purple-300 font-bold">
           {current} → {target} {unit}
         </span>
       </div>
       <div className="relative">
-        <div className="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-purple-500/20 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 rounded-full"
+            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"
             style={{ width: `${Math.max(5, progress)}%` }}
           />
         </div>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-[10px] text-zinc-500">{progress.toFixed(0)}%</span>
+        <span className="text-[10px] text-purple-300/60 font-medium">{progress.toFixed(0)}%</span>
         <span className="text-[10px] text-purple-400">{diffText}</span>
       </div>
     </div>

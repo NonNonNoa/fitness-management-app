@@ -17,18 +17,18 @@ const publicRoutes = ["/", "/login", "/signup"];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // セッショントークンの確認
-  // BetterAuthのセッションクッキー名を確認（デフォルトは "better-auth.session_token"）
-  // 複数のクッキー名をチェック（BetterAuthのバージョンによって異なる可能性がある）
-  const sessionToken = 
-    request.cookies.get("better-auth.session_token") ||
-    request.cookies.get("better-auth.session-token") ||
-    request.cookies.get("better_auth_session_token");
-
   // 保護されたルートへのアクセス
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
+
+  // BetterAuthのセッションクッキーを確認
+  // BetterAuthはデフォルトで "better-auth.session_token" という名前のクッキーを使用
+  // 複数の可能性のあるクッキー名をチェック
+  const sessionToken = 
+    request.cookies.get("better-auth.session_token")?.value ||
+    request.cookies.get("better-auth.session-token")?.value ||
+    request.cookies.get("better_auth_session_token")?.value;
 
   // 認証が必要なルートにアクセスしようとしているが、セッションがない場合
   if (isProtectedRoute && !sessionToken) {

@@ -167,10 +167,13 @@ export const goals = sqliteTable("goals", {
 /**
  * トレーニング種目テーブル
  * 利用可能なトレーニング種目のマスターデータ
+ * userIdがnullの場合は全ユーザー共通、設定されている場合はユーザー固有の種目
  */
 export const exercises = sqliteTable("exercises", {
   /** 種目ID (UUID) */
   id: text("id").primaryKey(),
+  /** ユーザーID（nullの場合は全ユーザー共通の種目） */
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   /** 種目名（日本語） */
   name: text("name").notNull(),
   /** 種目名（英語） */
@@ -189,6 +192,7 @@ export const exercises = sqliteTable("exercises", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 }, (table) => ({
   bodyPartIdx: index("exercises_body_part_idx").on(table.bodyPart),
+  userIdIdx: index("exercises_user_id_idx").on(table.userId),
 }));
 
 /**

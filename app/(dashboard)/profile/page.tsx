@@ -19,8 +19,8 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      // すべてのセッションをクリア（Googleのセッションも含む）
-      await signOut({ fetchAll: true });
+      // セッションをクリア
+      await signOut();
       // 通常のログアウト時は、通常通りログインページにリダイレクト
       window.location.href = "/login";
     } catch (error) {
@@ -33,8 +33,8 @@ export default function ProfilePage() {
   const handleSwitchAccount = async () => {
     setSwitchingAccount(true);
     try {
-      // すべてのセッションをクリア（Googleのセッションも含む）
-      await signOut({ fetchAll: true });
+      // セッションをクリア
+      await signOut();
       
       // アカウント選択を促すログインページにリダイレクト
       // Googleのセッションは、ログイン時にprompt=select_accountで強制的にアカウント選択画面を表示することでクリアされる

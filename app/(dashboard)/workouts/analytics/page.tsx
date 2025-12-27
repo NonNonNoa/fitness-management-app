@@ -17,6 +17,7 @@ type ChartDataPoint = {
   set5?: number;
   maxWeight?: number;
   avgWeight?: number;
+  [key: string]: string | number | undefined;
 };
 
 export default function WorkoutAnalyticsPage() {
@@ -244,7 +245,8 @@ export default function WorkoutAnalyticsPage() {
                       borderRadius: "8px",
                     }}
                     labelStyle={{ color: "#fff" }}
-                    formatter={(value: number, name: string) => {
+                    formatter={(value: number | undefined, name: string | undefined) => {
+                      if (value === undefined || name === undefined) return ["", ""];
                       const labels: Record<string, string> = {
                         maxWeight: "最大重量",
                         avgWeight: "平均重量",
@@ -319,7 +321,8 @@ export default function WorkoutAnalyticsPage() {
                       borderRadius: "8px",
                     }}
                     labelStyle={{ color: "#fff" }}
-                    formatter={(value: number, name: string) => {
+                    formatter={(value: number | undefined, name: string | undefined) => {
+                      if (value === undefined || name === undefined) return ["", ""];
                       return [`${value}kg`, `セット${name.replace("set", "")}`];
                     }}
                   />

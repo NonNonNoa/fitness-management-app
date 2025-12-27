@@ -92,8 +92,8 @@ export default function WorkoutProgressPage() {
 
         exercise.sets.push({
           setNumber,
-          currentWeight,
-          previousWeight,
+          currentWeight: currentWeight ?? undefined,
+          previousWeight: previousWeight ?? undefined,
           weightDiff,
           weightDiffPercent,
           date: previousDate,

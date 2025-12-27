@@ -155,12 +155,12 @@ export default function ProfilePage() {
         transition={{ delay: 0.4 }}
       >
         <AnimatedButton
-          variant="outline"
+          variant="ghost"
           fullWidth
           onClick={handleSwitchAccount}
           loading={switchingAccount}
           icon={<RefreshCw className="w-4 h-4" />}
-          className="backdrop-blur-md bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:border-purple-500/50 font-medium transition-all duration-200"
+          className="backdrop-blur-md bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:border-purple-500/50 font-medium transition-all duration-200"
         >
           別のアカウントに切り替える
         </AnimatedButton>

@@ -274,6 +274,39 @@ export async function getExercises(bodyPart?: string) {
 }
 
 /**
+ * 新しい種目を作成する
+ * @param {object} data - 種目のデータ
+ * @param {string} data.name - 種目名（日本語）
+ * @param {string} data.bodyPart - 対象部位 (chest, back, legs, shoulders, arms, core)
+ * @param {string} [data.equipment] - 器具 (barbell, dumbbell, machine, cable, bodyweight)
+ * @returns {Promise<{success: boolean, exerciseId?: string, error?: string}>} 作成結果
+ */
+export async function createExercise(data: {
+  name: string;
+  bodyPart: string;
+  equipment?: string;
+}) {
+  try {
+    const exerciseId = generateId();
+
+    await db.insert(exercises).values({
+      id: exerciseId,
+      name: data.name,
+      bodyPart: data.bodyPart,
+      equipment: data.equipment || null,
+    });
+
+    revalidatePath("/workouts/new");
+    revalidatePath("/workouts");
+
+    return { success: true, exerciseId };
+  } catch (error) {
+    console.error("種目の作成に失敗しました:", error);
+    return { success: false, error: "種目の作成に失敗しました" };
+  }
+}
+
+/**
  * 今日の総セット数を取得する
  * @returns {Promise<number>} 今日の総セット数
  */

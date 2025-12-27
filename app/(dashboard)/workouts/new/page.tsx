@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createWorkout, getExercises, WorkoutFormData } from "@/lib/actions/workouts";
+import { createWorkout, getExercises, createExercise, WorkoutFormData } from "@/lib/actions/workouts";
 import { getBodyPartLabel } from "@/lib/utils/workout-helpers";
 import type { Exercise } from "@/lib/db/schema";
 
@@ -35,6 +35,11 @@ export default function NewWorkoutPage() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>(null);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
+  const [showCustomExerciseForm, setShowCustomExerciseForm] = useState(false);
+  const [customExerciseName, setCustomExerciseName] = useState("");
+  const [customExerciseBodyPart, setCustomExerciseBodyPart] = useState<string>("chest");
+  const [customExerciseEquipment, setCustomExerciseEquipment] = useState<string>("");
+  const [isCreatingExercise, setIsCreatingExercise] = useState(false);
 
   // 種目を取得
   useEffect(() => {
@@ -44,6 +49,44 @@ export default function NewWorkoutPage() {
     }
     loadExercises();
   }, [selectedBodyPart]);
+
+  const handleCreateCustomExercise = async () => {
+    if (!customExerciseName.trim()) {
+      setError("種目名を入力してください");
+      return;
+    }
+
+    setIsCreatingExercise(true);
+    setError(null);
+
+    const result = await createExercise({
+      name: customExerciseName.trim(),
+      bodyPart: customExerciseBodyPart,
+      equipment: customExerciseEquipment || undefined,
+    });
+
+    if (result.success && result.exerciseId) {
+      // 新しく作成した種目を取得して追加
+      const newExercises = await getExercises(selectedBodyPart || undefined);
+      setExercises(newExercises);
+      
+      // 作成した種目を自動的にセットに追加
+      const newExercise = newExercises.find(e => e.id === result.exerciseId);
+      if (newExercise) {
+        addSet(newExercise);
+      }
+
+      // フォームをリセット
+      setCustomExerciseName("");
+      setCustomExerciseBodyPart("chest");
+      setCustomExerciseEquipment("");
+      setShowCustomExerciseForm(false);
+    } else {
+      setError(result.error || "種目の作成に失敗しました");
+    }
+
+    setIsCreatingExercise(false);
+  };
 
   const addSet = (exercise: Exercise) => {
     // 同じ種目の最後のセット番号を取得
@@ -292,6 +335,89 @@ export default function NewWorkoutPage() {
                 ))}
               </div>
 
+              {/* カスタム種目追加フォーム */}
+              {showCustomExerciseForm ? (
+                <div className="p-4 bg-zinc-800/50 rounded-lg space-y-4 border border-zinc-700">
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                      種目名
+                    </label>
+                    <Input
+                      placeholder="例: カスタムベンチプレス"
+                      value={customExerciseName}
+                      onChange={(e) => setCustomExerciseName(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                      部位
+                    </label>
+                    <select
+                      value={customExerciseBodyPart}
+                      onChange={(e) => setCustomExerciseBodyPart(e.target.value)}
+                      className="w-full p-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                      {bodyParts.map((part) => (
+                        <option key={part} value={part}>
+                          {getBodyPartLabel(part)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                      器具（任意）
+                    </label>
+                    <select
+                      value={customExerciseEquipment}
+                      onChange={(e) => setCustomExerciseEquipment(e.target.value)}
+                      className="w-full p-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="">指定なし</option>
+                      <option value="barbell">バーベル</option>
+                      <option value="dumbbell">ダンベル</option>
+                      <option value="machine">マシン</option>
+                      <option value="cable">ケーブル</option>
+                      <option value="bodyweight">自重</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={handleCreateCustomExercise}
+                      isLoading={isCreatingExercise}
+                      className="flex-1"
+                    >
+                      作成して追加
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCustomExerciseForm(false);
+                        setCustomExerciseName("");
+                        setCustomExerciseBodyPart("chest");
+                        setCustomExerciseEquipment("");
+                      }}
+                      className="px-4 py-2 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-800 transition-colors"
+                    >
+                      キャンセル
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowCustomExerciseForm(true)}
+                  className="w-full p-3 border-2 border-dashed border-orange-500/50 rounded-lg text-orange-400 hover:border-orange-500 hover:bg-orange-500/10 transition-all flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  新しい種目を追加
+                </button>
+              )}
+
               {/* 種目リスト */}
               <div className="max-h-64 overflow-y-auto space-y-1">
                 {exercises.map((exercise) => (
@@ -311,7 +437,10 @@ export default function NewWorkoutPage() {
 
               <button
                 type="button"
-                onClick={() => setShowExerciseSelector(false)}
+                onClick={() => {
+                  setShowExerciseSelector(false);
+                  setShowCustomExerciseForm(false);
+                }}
                 className="w-full py-2 text-zinc-400 hover:text-white transition-colors"
               >
                 閉じる

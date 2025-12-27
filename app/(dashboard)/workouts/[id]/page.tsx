@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getWorkoutWithSets, updateWorkout, deleteWorkout, getExercises, createExercise, WorkoutFormData } from "@/lib/actions/workouts";
+import { getWorkoutWithSets, updateWorkout, deleteWorkout, getExercises, createExercise, updateExercise, deleteExercise, WorkoutFormData } from "@/lib/actions/workouts";
 import { getBodyPartLabel } from "@/lib/utils/workout-helpers";
 import type { Exercise } from "@/lib/db/schema";
 
@@ -43,6 +43,10 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
   const [customExerciseBodyPart, setCustomExerciseBodyPart] = useState<string>("chest");
   const [customExerciseEquipment, setCustomExerciseEquipment] = useState<string>("");
   const [isCreatingExercise, setIsCreatingExercise] = useState(false);
+  const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
+  const [editingExerciseName, setEditingExerciseName] = useState<string>("");
+  const [isUpdatingExercise, setIsUpdatingExercise] = useState(false);
+  const [deletingExerciseId, setDeletingExerciseId] = useState<string | null>(null);
 
   // 種目を取得
   useEffect(() => {
@@ -104,17 +108,16 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
       setWorkoutDate(workout.workoutDate);
       setDurationMinutes(workout.durationMinutes || undefined);
       setNotes(workout.notes || "");
-      setSets(
-        workout.sets.map((s) => ({
-          id: s.set.id,
-          exerciseId: s.set.exerciseId,
-          exerciseName: s.exercise?.name || "不明な種目",
-          setNumber: s.set.setNumber,
-          weightKg: s.set.weightKg || undefined,
-          reps: s.set.reps || undefined,
-          rpe: s.set.rpe || undefined,
-        }))
-      );
+      const loadedSets = workout.sets.map((s) => ({
+        id: s.set.id,
+        exerciseId: s.set.exerciseId,
+        exerciseName: s.exercise?.name || "不明な種目",
+        setNumber: s.set.setNumber,
+        weightKg: s.set.weightKg || undefined,
+        reps: s.set.reps || undefined,
+        rpe: s.set.rpe || undefined,
+      }));
+      setSets(loadedSets);
       setIsInitialLoading(false);
     }
     loadWorkout();
@@ -142,7 +145,7 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
     setShowExerciseSelector(false);
   };
 
-  const removeSet = (setId: string) => {
+  const removeSet = async (setId: string) => {
     const setToRemove = sets.find((s) => s.id === setId);
     if (!setToRemove) return;
 
@@ -157,6 +160,23 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
       });
 
     setSets(updatedSets);
+
+    // 自動保存
+    if (updatedSets.length > 0) {
+      const data: WorkoutFormData = {
+        workoutDate,
+        durationMinutes,
+        notes: notes || undefined,
+        sets: updatedSets.map((set) => ({
+          exerciseId: set.exerciseId,
+          setNumber: set.setNumber,
+          weightKg: set.weightKg,
+          reps: set.reps,
+          rpe: set.rpe,
+        })),
+      };
+      await updateWorkout(id, data);
+    }
   };
 
   const updateSet = (setId: string, field: keyof WorkoutSet, value: string | number) => {
@@ -230,6 +250,96 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
     acc[set.exerciseId].sets.push(set);
     return acc;
   }, {} as Record<string, { name: string; sets: WorkoutSet[] }>);
+
+  const handleStartEditExercise = (exerciseId: string, currentName: string) => {
+    setEditingExerciseId(exerciseId);
+    setEditingExerciseName(currentName);
+  };
+
+  const handleSaveExerciseName = async (exerciseId: string) => {
+    if (!editingExerciseName.trim()) {
+      setError("種目名を入力してください");
+      return;
+    }
+
+    setIsUpdatingExercise(true);
+    setError(null);
+
+    const result = await updateExercise(exerciseId, editingExerciseName.trim());
+
+    if (result.success) {
+      // セットの種目名を更新
+      setSets(sets.map(set => 
+        set.exerciseId === exerciseId 
+          ? { ...set, exerciseName: editingExerciseName.trim() }
+          : set
+      ));
+      setEditingExerciseId(null);
+      setEditingExerciseName("");
+    } else {
+      setError(result.error || "種目名の更新に失敗しました");
+    }
+
+    setIsUpdatingExercise(false);
+  };
+
+  const handleCancelEditExercise = () => {
+    setEditingExerciseId(null);
+    setEditingExerciseName("");
+  };
+
+  const handleDeleteExercise = async (exerciseId: string) => {
+    // この種目が使用されているかチェック
+    const isUsedInSets = sets.some(set => set.exerciseId === exerciseId);
+    
+    if (isUsedInSets) {
+      if (!confirm("この種目は現在のトレーニングで使用されています。削除すると、この種目のセットも削除されます。削除しますか？")) {
+        return;
+      }
+    } else {
+      if (!confirm("この種目を削除しますか？")) {
+        return;
+      }
+    }
+
+    setDeletingExerciseId(exerciseId);
+    setError(null);
+
+    const result = await deleteExercise(exerciseId);
+
+    if (result.success) {
+      // この種目のセットを削除（使用されている場合）
+      const updatedSets = sets.filter(set => set.exerciseId !== exerciseId);
+      setSets(updatedSets);
+      
+      // 種目リストからも削除
+      setExercises(exercises.filter(ex => ex.id !== exerciseId));
+
+      // 自動保存（セットが残っている場合、かつ使用されていた場合）
+      if (isUsedInSets && updatedSets.length > 0) {
+        const data: WorkoutFormData = {
+          workoutDate,
+          durationMinutes,
+          notes: notes || undefined,
+          sets: updatedSets.map((set) => ({
+            exerciseId: set.exerciseId,
+            setNumber: set.setNumber,
+            weightKg: set.weightKg,
+            reps: set.reps,
+            rpe: set.rpe,
+          })),
+        };
+        await updateWorkout(id, data);
+      } else if (isUsedInSets && updatedSets.length === 0) {
+        // セットがなくなった場合はエラーを表示
+        setError("少なくとも1セット必要です。種目を追加してください。");
+      }
+    } else {
+      setError(result.error || "種目の削除に失敗しました");
+    }
+
+    setDeletingExerciseId(null);
+  };
 
   if (isInitialLoading) {
     return (
@@ -329,20 +439,86 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
                 種目を選択してセットを追加してください
               </p>
             ) : (
-              Object.entries(setsByExercise).map(([exerciseId, { name, sets: exerciseSets }]) => (
+              Object.entries(setsByExercise).map(([exerciseId, { name, sets: exerciseSets }]) => {
+                const exercise = exercises.find((e) => e.id === exerciseId);
+                const isUserExercise = exercise?.userId !== null && exercise?.userId !== undefined;
+                const isEditing = editingExerciseId === exerciseId;
+                
+                return (
                 <div key={exerciseId} className="p-4 bg-zinc-800/50 rounded-lg">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium text-white">{name}</h3>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const exercise = exercises.find((e) => e.id === exerciseId);
-                        if (exercise) addSet(exercise);
-                      }}
-                      className="text-xs text-orange-400 hover:text-orange-300"
-                    >
-                      + セット追加
-                    </button>
+                    {isEditing ? (
+                      <div className="flex items-center gap-2 flex-1">
+                        <Input
+                          value={editingExerciseName}
+                          onChange={(e) => setEditingExerciseName(e.target.value)}
+                          className="flex-1"
+                          placeholder="種目名"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveExerciseName(exerciseId)}
+                          disabled={isUpdatingExercise}
+                          className="px-3 py-1 text-xs bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-50"
+                        >
+                          保存
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCancelEditExercise}
+                          className="px-3 py-1 text-xs bg-zinc-700 text-white rounded hover:bg-zinc-600"
+                        >
+                          キャンセル
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-white">{name}</h3>
+                          {isUserExercise && (
+                            <span className="px-1.5 py-0.5 text-xs bg-orange-500/20 text-orange-400 rounded border border-orange-500/30">
+                              追加種目
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isUserExercise && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleStartEditExercise(exerciseId, name)}
+                                className="text-xs text-zinc-400 hover:text-zinc-300"
+                                title="種目名を編集"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteExercise(exerciseId)}
+                                disabled={deletingExerciseId === exerciseId}
+                                className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+                                title="種目を削除"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (exercise) addSet(exercise);
+                            }}
+                            className="text-xs text-orange-400 hover:text-orange-300"
+                          >
+                            + セット追加
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -384,7 +560,8 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
                     ))}
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
 
             {/* 種目追加ボタン */}
@@ -519,19 +696,49 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
 
               {/* 種目リスト */}
               <div className="max-h-64 overflow-y-auto space-y-1">
-                {exercises.map((exercise) => (
-                  <button
-                    key={exercise.id}
-                    type="button"
-                    onClick={() => addSet(exercise)}
-                    className="w-full p-3 text-left bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-                  >
-                    <div className="font-medium text-white">{exercise.name}</div>
-                    <div className="text-xs text-zinc-500">
-                      {getBodyPartLabel(exercise.bodyPart)} • {exercise.equipment || "器具なし"}
+                {exercises.map((exercise) => {
+                  const isUserExercise = exercise.userId !== null && exercise.userId !== undefined;
+                  return (
+                    <div
+                      key={exercise.id}
+                      className="flex items-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors group"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => addSet(exercise)}
+                        className="flex-1 text-left"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">{exercise.name}</span>
+                          {isUserExercise && (
+                            <span className="px-1.5 py-0.5 text-xs bg-orange-500/20 text-orange-400 rounded border border-orange-500/30">
+                              追加種目
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-zinc-500">
+                          {getBodyPartLabel(exercise.bodyPart)} • {exercise.equipment || "器具なし"}
+                        </div>
+                      </button>
+                      {isUserExercise && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteExercise(exercise.id);
+                          }}
+                          disabled={deletingExerciseId === exercise.id}
+                          className="p-1.5 text-zinc-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                          title="種目を削除"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
 
               <button
@@ -554,8 +761,9 @@ export default function EditWorkoutPage({ params }: { params: Promise<{ id: stri
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="トレーニングに関するメモ..."
-            className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+            className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none overflow-y-auto"
             rows={3}
+            style={{ minHeight: "80px", maxHeight: "200px" }}
           />
         </Card>
 

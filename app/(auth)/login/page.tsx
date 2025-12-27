@@ -39,6 +39,10 @@ export default function LoginPage() {
     console.log("Starting Google sign in...");
     console.log("Callback URL:", callbackUrl);
     
+    // URLパラメータからアカウント選択を促すかどうかを確認
+    const urlParams = new URLSearchParams(window.location.search);
+    const promptSelectAccount = urlParams.get("prompt") === "select_account";
+    
     try {
       const result = await signIn.social({
         provider: "google",
@@ -73,25 +77,24 @@ export default function LoginPage() {
       if (result?.data) {
         const data = result.data as SignInData;
         
-        // redirect: true の場合、OAuthプロバイダーにリダイレクト
-        // コールバック後のリダイレクトはBetterAuthのcallbacks.onOAuthCallback.redirectが処理する
-        if (data.redirect && (data.url || data.redirectUrl)) {
-          const redirectUrl = data.url || data.redirectUrl;
-          if (redirectUrl && typeof redirectUrl === "string") {
-            console.log("Redirecting to OAuth provider:", redirectUrl);
-            // OAuthプロバイダーにリダイレクト（ここで処理を停止）
-            // コールバック後のリダイレクトはBetterAuthが自動的に処理する
-            if (typeof window !== "undefined") {
-              window.location.href = redirectUrl;
-            }
-            return;
-          }
-        }
-        
-        // redirect: false の場合もリダイレクトURLがあれば使用
-        const redirectUrl = data.url || data.redirectUrl;
+        // リダイレクトURLを取得
+        let redirectUrl = data.url || data.redirectUrl;
         if (redirectUrl && typeof redirectUrl === "string") {
-          console.log("Redirecting to:", redirectUrl);
+          // アカウント選択を促す場合は、URLにprompt=select_accountを追加
+          if (promptSelectAccount) {
+            try {
+              const url = new URL(redirectUrl);
+              // Google OAuth URLの場合、promptパラメータを追加
+              url.searchParams.set("prompt", "select_account");
+              redirectUrl = url.toString();
+              console.log("Added prompt=select_account to URL:", redirectUrl);
+            } catch (error) {
+              console.error("Failed to parse URL:", error);
+              // URLの解析に失敗した場合は、元のURLを使用
+            }
+          }
+          
+          console.log("Redirecting to OAuth provider:", redirectUrl);
           if (typeof window !== "undefined") {
             window.location.href = redirectUrl;
           }

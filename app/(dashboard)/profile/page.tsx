@@ -5,7 +5,7 @@ import { useSession, signOut } from "@/lib/auth/client";
 import { motion } from "framer-motion";
 import { 
   User, Mail, Calendar, LogOut, Moon, Bell, 
-  Shield, HelpCircle, ChevronRight, Settings
+  Shield, HelpCircle, ChevronRight, Settings, RefreshCw
 } from "lucide-react";
 import { AnimatedCard } from "@/components/ui/animated-card";
 import { AnimatedButton } from "@/components/ui/animated-button";
@@ -14,14 +14,35 @@ export default function ProfilePage() {
   const { data: session, isPending } = useSession();
   const [loggingOut, setLoggingOut] = useState(false);
 
+  const [switchingAccount, setSwitchingAccount] = useState(false);
+
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      await signOut();
+      // すべてのセッションをクリア（Googleのセッションも含む）
+      await signOut({ fetchAll: true });
+      // 通常のログアウト時は、通常通りログインページにリダイレクト
       window.location.href = "/login";
     } catch (error) {
       console.error("Logout failed:", error);
-      setLoggingOut(false);
+      // エラーが発生してもログインページにリダイレクト
+      window.location.href = "/login";
+    }
+  };
+
+  const handleSwitchAccount = async () => {
+    setSwitchingAccount(true);
+    try {
+      // すべてのセッションをクリア（Googleのセッションも含む）
+      await signOut({ fetchAll: true });
+      
+      // アカウント選択を促すログインページにリダイレクト
+      // Googleのセッションは、ログイン時にprompt=select_accountで強制的にアカウント選択画面を表示することでクリアされる
+      window.location.href = "/login?prompt=select_account";
+    } catch (error) {
+      console.error("Switch account failed:", error);
+      // エラーが発生してもアカウント選択を促すログインページにリダイレクト
+      window.location.href = "/login?prompt=select_account";
     }
   };
 
@@ -127,11 +148,29 @@ export default function ProfilePage() {
         </div>
       </AnimatedCard>
 
-      {/* Logout */}
+      {/* Switch Account */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
+      >
+        <AnimatedButton
+          variant="outline"
+          fullWidth
+          onClick={handleSwitchAccount}
+          loading={switchingAccount}
+          icon={<RefreshCw className="w-4 h-4" />}
+          className="backdrop-blur-md bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:border-purple-500/50 font-medium transition-all duration-200"
+        >
+          別のアカウントに切り替える
+        </AnimatedButton>
+      </motion.div>
+
+      {/* Logout */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.45 }}
       >
         <AnimatedButton
           variant="danger"

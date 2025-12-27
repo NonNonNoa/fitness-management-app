@@ -6,7 +6,7 @@
 
 import { db } from "@/lib/db";
 import { workouts, workoutSets, exercises } from "@/lib/db/schema";
-import { eq, and, desc, gte, lte } from "drizzle-orm";
+import { eq, and, or, desc, gte, lte, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -255,18 +255,37 @@ export async function deleteWorkout(workoutId: string) {
 /**
  * トレーニング種目一覧を取得する
  * @param {string} [bodyPart] - 部位でフィルタリング (chest, back, legs, shoulders, arms, core)
- * @returns {Promise<Array>} 種目の配列
+ * @returns {Promise<Array>} 種目の配列（共通種目 + ユーザー固有種目）
  */
 export async function getExercises(bodyPart?: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   try {
+    const userId = session?.user?.id;
+    
+    // ユーザー固有の種目と共通種目（userIdがnull）を取得
+    const conditions = userId 
+      ? [or(eq(exercises.userId, userId), isNull(exercises.userId))]
+      : [isNull(exercises.userId)];
+    
+    if (bodyPart) {
+      conditions.push(eq(exercises.bodyPart, bodyPart));
+    }
+
     if (bodyPart) {
       return await db
         .select()
         .from(exercises)
-        .where(eq(exercises.bodyPart, bodyPart))
+        .where(and(...conditions))
         .orderBy(exercises.name);
     }
-    return await db.select().from(exercises).orderBy(exercises.bodyPart, exercises.name);
+    return await db
+      .select()
+      .from(exercises)
+      .where(and(...conditions))
+      .orderBy(exercises.bodyPart, exercises.name);
   } catch (error) {
     console.error("種目の取得に失敗しました:", error);
     return [];
@@ -286,11 +305,20 @@ export async function createExercise(data: {
   bodyPart: string;
   equipment?: string;
 }) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です" };
+  }
+
   try {
     const exerciseId = generateId();
 
     await db.insert(exercises).values({
       id: exerciseId,
+      userId: session.user.id, // ユーザー固有の種目として作成
       name: data.name,
       bodyPart: data.bodyPart,
       equipment: data.equipment || null,
@@ -303,6 +331,69 @@ export async function createExercise(data: {
   } catch (error) {
     console.error("種目の作成に失敗しました:", error);
     return { success: false, error: "種目の作成に失敗しました" };
+  }
+}
+
+/**
+ * 種目名を更新する
+ * @param {string} exerciseId - 更新する種目のID
+ * @param {string} name - 新しい種目名
+ * @returns {Promise<{success: boolean, error?: string}>} 更新結果
+ */
+export async function updateExercise(exerciseId: string, name: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です" };
+  }
+
+  try {
+    // ユーザー固有の種目のみ更新可能（共通種目は編集不可）
+    const result = await db
+      .update(exercises)
+      .set({ name: name.trim() })
+      .where(and(eq(exercises.id, exerciseId), eq(exercises.userId, session.user.id)));
+
+    revalidatePath("/workouts/new");
+    revalidatePath("/workouts");
+
+    return { success: true };
+  } catch (error) {
+    console.error("種目の更新に失敗しました:", error);
+    return { success: false, error: "種目の更新に失敗しました" };
+  }
+}
+
+/**
+ * 種目を削除する
+ * @param {string} exerciseId - 削除する種目のID
+ * @returns {Promise<{success: boolean, error?: string}>} 削除結果
+ */
+export async function deleteExercise(exerciseId: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return { success: false, error: "認証が必要です" };
+  }
+
+  try {
+    // ユーザー固有の種目のみ削除可能（共通種目は削除不可）
+    // また、この種目が使用されているセットがないか確認（オプション）
+    await db
+      .delete(exercises)
+      .where(and(eq(exercises.id, exerciseId), eq(exercises.userId, session.user.id)));
+
+    revalidatePath("/workouts/new");
+    revalidatePath("/workouts");
+
+    return { success: true };
+  } catch (error) {
+    console.error("種目の削除に失敗しました:", error);
+    return { success: false, error: "種目の削除に失敗しました" };
   }
 }
 
@@ -494,5 +585,145 @@ export async function updateWorkout(workoutId: string, data: WorkoutFormData) {
   } catch (error) {
     console.error("トレーニング記録の更新に失敗しました:", error);
     return { success: false, error: "トレーニング記録の更新に失敗しました" };
+  }
+}
+
+/**
+ * 特定の種目の過去の記録を取得する
+ * @param {string} exerciseId - 種目ID
+ * @param {string} currentWorkoutDate - 現在のトレーニング日（この日より前の記録を取得）
+ * @param {number} [limit=10] - 取得件数
+ * @returns {Promise<Array>} 過去のセット記録の配列
+ */
+export async function getExerciseHistory(exerciseId: string, currentWorkoutDate: string, limit = 10) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  try {
+    // 現在のトレーニング日より前の記録を取得
+    const history = await db
+      .select({
+        workoutDate: workouts.workoutDate,
+        weightKg: workoutSets.weightKg,
+        reps: workoutSets.reps,
+        setNumber: workoutSets.setNumber,
+      })
+      .from(workoutSets)
+      .innerJoin(workouts, eq(workoutSets.workoutId, workouts.id))
+      .where(
+        and(
+          eq(workouts.userId, session.user.id),
+          eq(workoutSets.exerciseId, exerciseId),
+          lte(workouts.workoutDate, currentWorkoutDate)
+        )
+      )
+      .orderBy(desc(workouts.workoutDate), workoutSets.setNumber)
+      .limit(limit);
+
+    return history;
+  } catch (error) {
+    console.error("種目の過去記録の取得に失敗しました:", error);
+    return [];
+  }
+}
+
+/**
+ * 特定の種目の前回の記録を取得する（同じセット番号の最大重量）
+ * @param {string} exerciseId - 種目ID
+ * @param {string} currentWorkoutDate - 現在のトレーニング日
+ * @param {number} setNumber - セット番号
+ * @returns {Promise<{weightKg?: number, reps?: number, date?: string} | null>} 前回の記録
+ */
+export async function getPreviousExerciseRecord(exerciseId: string, currentWorkoutDate: string, setNumber: number) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return null;
+  }
+
+  try {
+    // 現在のトレーニング日より前の記録を取得（同じセット番号）
+    const previous = await db
+      .select({
+        workoutDate: workouts.workoutDate,
+        weightKg: workoutSets.weightKg,
+        reps: workoutSets.reps,
+      })
+      .from(workoutSets)
+      .innerJoin(workouts, eq(workoutSets.workoutId, workouts.id))
+      .where(
+        and(
+          eq(workouts.userId, session.user.id),
+          eq(workoutSets.exerciseId, exerciseId),
+          eq(workoutSets.setNumber, setNumber),
+          lte(workouts.workoutDate, currentWorkoutDate)
+        )
+      )
+      .orderBy(desc(workouts.workoutDate))
+      .limit(1);
+
+    if (previous.length === 0) {
+      return null;
+    }
+
+    return {
+      weightKg: previous[0].weightKg || undefined,
+      reps: previous[0].reps || undefined,
+      date: previous[0].workoutDate,
+    };
+  } catch (error) {
+    console.error("前回の記録の取得に失敗しました:", error);
+    return null;
+  }
+}
+
+/**
+ * 特定の種目の期間内の記録を取得する（グラフ用）
+ * @param {string} exerciseId - 種目ID
+ * @param {string} startDate - 開始日 (YYYY-MM-DD)
+ * @param {string} endDate - 終了日 (YYYY-MM-DD)
+ * @returns {Promise<Array>} 期間内の記録の配列
+ */
+export async function getExerciseRecordsByPeriod(exerciseId: string, startDate: string, endDate: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  try {
+    // 期間内の記録を取得
+    const records = await db
+      .select({
+        workoutDate: workouts.workoutDate,
+        weightKg: workoutSets.weightKg,
+        reps: workoutSets.reps,
+        setNumber: workoutSets.setNumber,
+      })
+      .from(workoutSets)
+      .innerJoin(workouts, eq(workoutSets.workoutId, workouts.id))
+      .where(
+        and(
+          eq(workouts.userId, session.user.id),
+          eq(workoutSets.exerciseId, exerciseId),
+          gte(workouts.workoutDate, startDate),
+          lte(workouts.workoutDate, endDate)
+        )
+      )
+      .orderBy(workouts.workoutDate, workoutSets.setNumber);
+
+    return records;
+  } catch (error) {
+    console.error("期間内の記録の取得に失敗しました:", error);
+    return [];
   }
 }
